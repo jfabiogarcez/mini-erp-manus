@@ -262,3 +262,41 @@
 - [ ] Sincronizar com missões, tarefas e multas
 - [ ] Adicionar botão "Adicionar ao Calendário" em todas as entidades
 - [ ] Implementar alertas visuais e por e-mail
+
+## Implementação das 4 Novas Funcionalidades
+
+### 1. Extração Automática de PDFs de Multas
+- [x] Implementar endpoint para processar PDF de multa
+- [x] Usar IA (LLM + OCR) para extrair dados do PDF
+- [x] Extrair: número do auto, valor, data, local, código da infração, pontos
+- [ ] Preencher automaticamente o formulário de multa
+- [ ] Adicionar feedback visual do progresso de extração
+
+### 2. Upload de Excel para Cadastro em Massa
+- [ ] Criar endpoint para processar Excel de membros da equipe
+- [ ] Criar endpoint para processar Excel de multas
+- [ ] Validar dados da planilha antes de importar
+- [ ] Implementar importação em lote com tratamento de erros
+- [ ] Adicionar interface de upload com preview dos dados
+
+### 3. Exportação de Missões em Excel
+- [ ] Criar endpoint para exportar missões em Excel
+- [ ] Adicionar seletor de quantidade de linhas
+- [ ] Implementar filtros para exportação (data, cliente, status)
+- [ ] Gerar planilha formatada com todas as colunas relevantes
+- [ ] Adicionar botão de exportação na página de missões
+
+### 4. Calendário Visual Interativo
+- [ ] Instalar biblioteca FullCalendar
+- [ ] Criar componente de calendário com visualizações (mensal/semanal/diária)
+- [ ] Sincronizar eventos com missões, tarefas e multas
+- [ ] Implementar cores por urgência (vermelho/amarelo/verde)
+- [ ] Adicionar drag-and-drop para reagendar eventos
+- [ ] Criar página dedicada ao calendário
+
+### 5. Integração Automática de Multas no Calendário
+- [ ] Ao importar multa, criar evento no calendário automaticamente
+- [ ] Vincular evento com missão correspondente (se houver)
+- [ ] Vincular evento com motorista e veículo
+- [ ] Permitir visualização de multas passadas no calendário
+- [ ] Adicionar alertas de vencimento de multas

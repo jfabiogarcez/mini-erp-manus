@@ -343,6 +343,13 @@ export const appRouter = router({
         await deleteMulta(input.id);
         return { success: true };
       }),
+    extractFromPDF: protectedProcedure
+      .input(z.object({ pdfUrl: z.string() }))
+      .mutation(async ({ input }) => {
+        const { extractMultaFromPDF } = await import("./pdfExtractor");
+        const data = await extractMultaFromPDF(undefined, input.pdfUrl);
+        return data;
+      }),
   }),
 });
 
