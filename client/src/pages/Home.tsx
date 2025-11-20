@@ -19,7 +19,7 @@ export default function Home() {
   // Use APP_LOGO (as image src) and APP_TITLE if needed
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center" style={{backgroundColor: '#0433ff'}}>
+    <div className="min-h-screen flex flex-col items-center justify-center" style={{backgroundColor: '#000000'}}>
       <main className="text-center space-y-8 p-8">
         <div className="space-y-4">
           <h1 className="text-5xl font-bold text-white">{APP_TITLE}</h1>
