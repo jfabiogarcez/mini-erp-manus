@@ -426,3 +426,108 @@ export async function deleteMulta(id: number) {
   const { multas } = await import("../drizzle/schema");
   await db.delete(multas).where(eq(multas.id, id));
 }
+
+// ===== Funções de Serviços =====
+
+export async function getAllServicos() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { servicos } = await import("../drizzle/schema");
+  return db.select().from(servicos).orderBy(servicos.nome);
+}
+
+export async function getServicosAtivos() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { servicos } = await import("../drizzle/schema");
+  return db.select().from(servicos).where(eq(servicos.ativo, 1)).orderBy(servicos.nome);
+}
+
+export async function getServicoById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { servicos } = await import("../drizzle/schema");
+  const result = await db.select().from(servicos).where(eq(servicos.id, id)).limit(1);
+  return result[0];
+}
+
+export async function createServico(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { servicos } = await import("../drizzle/schema");
+  const result = await db.insert(servicos).values(data);
+  return Number((result as any).insertId);
+}
+
+export async function updateServico(id: number, data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { servicos } = await import("../drizzle/schema");
+  await db.update(servicos).set(data).where(eq(servicos.id, id));
+}
+
+export async function deleteServico(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { servicos } = await import("../drizzle/schema");
+  await db.delete(servicos).where(eq(servicos.id, id));
+}
+
+// ===== Funções de Links de Cobrança =====
+
+export async function getAllLinksCobranca() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { linksCobranca } = await import("../drizzle/schema");
+  return db.select().from(linksCobranca).orderBy(desc(linksCobranca.createdAt));
+}
+
+export async function getLinkCobrancaById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { linksCobranca } = await import("../drizzle/schema");
+  const result = await db.select().from(linksCobranca).where(eq(linksCobranca.id, id)).limit(1);
+  return result[0];
+}
+
+export async function getLinkCobrancaBySessionId(sessionId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { linksCobranca } = await import("../drizzle/schema");
+  const result = await db.select().from(linksCobranca).where(eq(linksCobranca.stripeCheckoutSessionId, sessionId)).limit(1);
+  return result[0];
+}
+
+export async function createLinkCobranca(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { linksCobranca } = await import("../drizzle/schema");
+  const result = await db.insert(linksCobranca).values(data);
+  return Number((result as any).insertId);
+}
+
+export async function updateLinkCobranca(id: number, data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { linksCobranca } = await import("../drizzle/schema");
+  await db.update(linksCobranca).set(data).where(eq(linksCobranca.id, id));
+}
+
+export async function updateLinkCobrancaBySessionId(sessionId: string, data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { linksCobranca } = await import("../drizzle/schema");
+  await db.update(linksCobranca).set(data).where(eq(linksCobranca.stripeCheckoutSessionId, sessionId));
+}

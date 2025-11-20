@@ -300,3 +300,33 @@
 - [ ] Vincular evento com motorista e veículo
 - [ ] Permitir visualização de multas passadas no calendário
 - [ ] Adicionar alertas de vencimento de multas
+
+## Sistema de Upload de PDFs e Cobrança por Link
+
+### 1. Upload de PDFs de Multas com Extração Automática
+- [x] Adicionar botão "Upload PDFs" na página de Multas
+- [x] Implementar upload múltiplo de PDFs para S3
+- [x] Conectar upload com endpoint de extração automática
+- [x] Exibir progresso de extração para cada PDF
+- [x] Criar multas automaticamente com dados extraídos
+- [ ] Adicionar botão de download de PDFs nas multas cadastradas
+
+### 2. Integração com Stripe
+- [x] Configurar Stripe no projeto (webdev_add_feature stripe)
+- [x] Criar banco de dados de serviços/produtos da empresa
+- [x] Implementar CRUD de serviços (nome, descrição, preço)
+- [x] Criar endpoint para gerar link de pagamento Stripe
+
+### 3. Página de Cobrança por Link
+- [x] Criar nova aba "Cobrança" no menu lateral
+- [x] Implementar seletor de serviços da empresa
+- [x] Criar calculadora interativa de valores
+- [x] Adicionar campo de desconto (porcentagem)
+- [x] Implementar checkout com Stripe
+- [x] Gerar link único de pagamento
+
+### 4. Compartilhamento de Link de Pagamento
+- [x] Adicionar botão de compartilhamento via WhatsApp
+- [x] Adicionar botão de compartilhamento via E-mail
+- [x] Implementar cópia de link para área de transferência
+- [ ] Criar página pública de checkout para o cliente

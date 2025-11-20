@@ -238,6 +238,10 @@ export default function Dashboard() {
             <AlertCircle className="h-5 w-5" />
             Multas
           </Link>
+          <Link href="/cobranca" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+            <DollarSign className="h-5 w-5" />
+            Cobrança por Link
+          </Link>
           <div className="space-y-1">
             <Link href="/equipe" className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
               <div className="flex items-center gap-3">

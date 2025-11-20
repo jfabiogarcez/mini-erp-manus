@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO servicos (nome, descricao, preco, ativo, createdAt, updatedAt) VALUES\n('Transporte Executivo', 'Serviço de transporte executivo com veículo blindado e motorista especializado', 50000, 1, NOW(), NOW()),\n('Segurança Pessoal', 'Segurança pessoal profissional para eventos e deslocamentos', 80000, 1, NOW(), NOW()),\n('Receptivo de Aeroporto', 'Serviço de receptivo em aeroportos com transfer em veículo blindado', 35000, 1, NOW(), NOW()),\n('Escolta Armada', 'Serviço de escolta armada para transporte de valores ou pessoas de alto risco', 120000, 1, NOW(), NOW()),\n('Transporte para Eventos', 'Transporte especializado para eventos corporativos e sociais', 60000, 1, NOW(), NOW()),\n('Consultoria de Segurança', 'Análise de riscos e consultoria em segurança pessoal e patrimonial', 100000, 1, NOW(), NOW())",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2f4rVt6W4F2723W.9201f73b4a2c --database NEcvB6oGEqtoXUY7x8ussz --execute INSERT INTO servicos (nome, descricao, preco, ativo, createdAt, updatedAt) VALUES\n('Transporte Executivo', 'Serviço de transporte executivo com veículo blindado e motorista especializado', 50000, 1, NOW(), NOW()),\n('Segurança Pessoal', 'Segurança pessoal profissional para eventos e deslocamentos', 80000, 1, NOW(), NOW()),\n('Receptivo de Aeroporto', 'Serviço de receptivo em aeroportos com transfer em veículo blindado', 35000, 1, NOW(), NOW()),\n('Escolta Armada', 'Serviço de escolta armada para transporte de valores ou pessoas de alto risco', 120000, 1, NOW(), NOW()),\n('Transporte para Eventos', 'Transporte especializado para eventos corporativos e sociais', 60000, 1, NOW(), NOW()),\n('Consultoria de Segurança', 'Análise de riscos e consultoria em segurança pessoal e patrimonial', 100000, 1, NOW(), NOW())",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 128
+}

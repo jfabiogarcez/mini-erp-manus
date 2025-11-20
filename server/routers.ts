@@ -351,6 +351,156 @@ export const appRouter = router({
         return data;
       }),
   }),
+
+  servicos: router({
+    listAll: protectedProcedure.query(async () => {
+      const { getAllServicos } = await import("./db");
+      return getAllServicos();
+    }),
+    listAtivos: protectedProcedure.query(async () => {
+      const { getServicosAtivos } = await import("./db");
+      return getServicosAtivos();
+    }),
+    create: protectedProcedure
+      .input(z.object({
+        nome: z.string(),
+        descricao: z.string().optional(),
+        preco: z.number(),
+        ativo: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createServico } = await import("./db");
+        const id = await createServico(input);
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string().optional(),
+        descricao: z.string().optional(),
+        preco: z.number().optional(),
+        ativo: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const { updateServico } = await import("./db");
+        await updateServico(id, data);
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteServico } = await import("./db");
+        await deleteServico(input.id);
+        return { success: true };
+      }),
+  }),
+
+  cobranca: router({
+    listAll: protectedProcedure.query(async () => {
+      const { getAllLinksCobranca } = await import("./db");
+      return getAllLinksCobranca();
+    }),
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const { getLinkCobrancaById } = await import("./db");
+        return getLinkCobrancaById(input.id);
+      }),
+    criarCheckout: protectedProcedure
+      .input(z.object({
+        clienteNome: z.string(),
+        clienteEmail: z.string().email(),
+        clienteTelefone: z.string().optional(),
+        servicosIds: z.array(z.number()),
+        desconto: z.number().min(0).max(100).optional(),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const Stripe = (await import("stripe")).default;
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+        const { getServicoById, createLinkCobranca } = await import("./db");
+        const { calcularValorFinal } = await import("./products");
+
+        // Buscar serviços selecionados
+        const servicos = await Promise.all(
+          input.servicosIds.map(id => getServicoById(id))
+        );
+
+        // Calcular valor total
+        const valorTotal = servicos.reduce((sum, s) => sum + (s?.preco || 0), 0);
+        const desconto = input.desconto || 0;
+        const valorFinal = calcularValorFinal(valorTotal, desconto);
+
+        // Criar line items para o Stripe
+        const lineItems = servicos.map(servico => ({
+          price_data: {
+            currency: "brl",
+            product_data: {
+              name: servico!.nome,
+              description: servico!.descricao || undefined,
+            },
+            unit_amount: servico!.preco,
+          },
+          quantity: 1,
+        }));
+
+        // Aplicar desconto se houver
+        if (desconto > 0) {
+          const valorDesconto = valorTotal - valorFinal;
+          lineItems.push({
+            price_data: {
+              currency: "brl",
+              product_data: {
+                name: `Desconto (${desconto}%)`,
+                description: `Desconto de ${desconto}% aplicado`,
+              },
+              unit_amount: -valorDesconto,
+            },
+            quantity: 1,
+          });
+        }
+
+        // Criar sessão de checkout do Stripe
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: lineItems,
+          mode: "payment",
+          success_url: `${ctx.req.headers.origin}/cobranca/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${ctx.req.headers.origin}/cobranca`,
+          customer_email: input.clienteEmail,
+          client_reference_id: input.clienteNome,
+          metadata: {
+            cliente_nome: input.clienteNome,
+            cliente_email: input.clienteEmail,
+            cliente_telefone: input.clienteTelefone || "",
+            servicos_ids: JSON.stringify(input.servicosIds),
+            desconto: desconto.toString(),
+          },
+          allow_promotion_codes: true,
+        });
+
+        // Salvar no banco de dados
+        const linkId = await createLinkCobranca({
+          stripeCheckoutSessionId: session.id,
+          clienteNome: input.clienteNome,
+          clienteEmail: input.clienteEmail,
+          clienteTelefone: input.clienteTelefone,
+          valorTotal: valorFinal,
+          desconto,
+          status: "Pendente",
+          servicosIds: JSON.stringify(input.servicosIds),
+          observacoes: input.observacoes,
+          linkCheckout: session.url,
+        });
+
+        return {
+          linkId,
+          checkoutUrl: session.url,
+          sessionId: session.id,
+        };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

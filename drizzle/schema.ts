@@ -227,3 +227,42 @@ export const tarefas = mysqlTable("tarefas", {
 
 export type Tarefa = typeof tarefas.$inferSelect;
 export type InsertTarefa = typeof tarefas.$inferInsert;
+/**
+ * Tabela de serviços/produtos da empresa para cobrança
+ */
+export const servicos = mysqlTable("servicos", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  descricao: text("descricao"),
+  preco: int("preco").notNull(), // Preço em centavos
+  ativo: int("ativo").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Servico = typeof servicos.$inferSelect;
+export type InsertServico = typeof servicos.$inferInsert;
+
+/**
+ * Tabela de links de pagamento gerados
+ */
+export const linksCobranca = mysqlTable("linksCobranca", {
+  id: int("id").autoincrement().primaryKey(),
+  stripeCheckoutSessionId: varchar("stripeCheckoutSessionId", { length: 255 }).unique(),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  clienteNome: varchar("clienteNome", { length: 255 }),
+  clienteEmail: varchar("clienteEmail", { length: 320 }),
+  clienteTelefone: varchar("clienteTelefone", { length: 50 }),
+  valorTotal: int("valorTotal").notNull(), // Valor em centavos
+  desconto: int("desconto").default(0), // Desconto em porcentagem (0-100)
+  status: mysqlEnum("status", ["Pendente", "Pago", "Cancelado", "Expirado"]).default("Pendente").notNull(),
+  servicosIds: text("servicosIds"), // JSON array de IDs de serviços
+  observacoes: text("observacoes"),
+  linkCheckout: text("linkCheckout"),
+  dataPagamento: timestamp("dataPagamento"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LinkCobranca = typeof linksCobranca.$inferSelect;
+export type InsertLinkCobranca = typeof linksCobranca.$inferInsert;

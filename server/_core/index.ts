@@ -38,6 +38,9 @@ async function startServer() {
   // Webhook para integração com Manus
   const webhookRouter = await import("../webhook");
   app.use("/api/webhook", webhookRouter.default);
+  // Upload de arquivos
+  const uploadRouter = await import("../upload");
+  app.use("/api", uploadRouter.default);
   // tRPC API
   app.use(
     "/api/trpc",

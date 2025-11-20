@@ -107,16 +107,83 @@ export default function Multas() {
     });
   };
 
+  const [uploadingPdfs, setUploadingPdfs] = useState(false);
+  const extractPdf = trpc.multas.extractFromPDF.useMutation();
+
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    setUploadingPdfs(true);
+    const totalFiles = files.length;
+    let successCount = 0;
+    let errorCount = 0;
+
     try {
-      toast.info(`Processando ${files.length} arquivo(s)...`);
-      // TODO: Implementar upload e extração automática de dados do PDF
-      toast.success("Funcionalidade de extração automática será implementada em breve");
+      toast.info(`Processando ${totalFiles} arquivo(s)...`);
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file) continue;
+
+        try {
+          // Upload do PDF para S3
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error('Falha no upload do PDF');
+          }
+
+          const { url: pdfUrl } = await uploadResponse.json();
+
+          // Extrair dados do PDF usando IA
+          toast.info(`Extraindo dados do arquivo ${i + 1}/${totalFiles}...`);
+          const extractedData = await extractPdf.mutateAsync({ pdfUrl });
+
+          // Criar multa automaticamente com os dados extraídos
+          await createMulta.mutateAsync({
+            numeroAuto: extractedData.numeroAuto,
+            dataInfracao: extractedData.dataInfracao ? new Date(extractedData.dataInfracao) : undefined,
+            horaInfracao: extractedData.horaInfracao,
+            localInfracao: extractedData.localInfracao,
+            codigoInfracao: extractedData.codigoInfracao,
+            descricaoInfracao: extractedData.descricaoInfracao,
+            valor: extractedData.valor / 100, // Converter de centavos para reais
+            pontos: extractedData.pontos,
+            veiculoPlaca: extractedData.veiculoPlaca,
+            dataVencimento: extractedData.dataVencimento ? new Date(extractedData.dataVencimento) : undefined,
+            pdfUrl,
+            status: "Pendente",
+          });
+
+          successCount++;
+        } catch (error) {
+          console.error(`Erro ao processar ${file.name}:`, error);
+          errorCount++;
+        }
+      }
+
+      // Atualizar lista de multas
+      await refetch();
+
+      if (successCount > 0) {
+        toast.success(`${successCount} multa(s) cadastrada(s) com sucesso!`);
+      }
+      if (errorCount > 0) {
+        toast.error(`${errorCount} arquivo(s) falharam no processamento`);
+      }
     } catch (error) {
       toast.error("Erro ao processar PDFs");
+    } finally {
+      setUploadingPdfs(false);
+      // Resetar o input para permitir upload do mesmo arquivo novamente
+      e.target.value = '';
     }
   };
 
@@ -149,10 +216,19 @@ export default function Multas() {
         </div>
         <div className="flex gap-2">
           <label htmlFor="pdf-upload">
-            <Button variant="outline" className="gap-2" asChild>
+            <Button variant="outline" className="gap-2" asChild disabled={uploadingPdfs}>
               <span>
-                <Upload className="h-4 w-4" />
-                Upload PDFs
+                {uploadingPdfs ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4" />
+                    Upload PDFs
+                  </>
+                )}
               </span>
             </Button>
             <input
@@ -162,6 +238,7 @@ export default function Multas() {
               multiple
               className="hidden"
               onChange={handlePdfUpload}
+              disabled={uploadingPdfs}
             />
           </label>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
