@@ -87,6 +87,31 @@ export const appRouter = router({
         return verificarTarefasProximasVencimento(input.diasAntecedencia);
       }),
   }),
+  ia: router({
+    getConfig: publicProcedure.query(async () => {
+      const { getConfiguracaoIA } = await import("./aiSystem");
+      return getConfiguracaoIA();
+    }),
+    toggle: publicProcedure.mutation(async () => {
+      const { toggleIA } = await import("./aiSystem");
+      return toggleIA();
+    }),
+    getPadroes: publicProcedure.query(async () => {
+      const { getPadroesAprendidos } = await import("./aiSystem");
+      return getPadroesAprendidos();
+    }),
+    getEstatisticas: publicProcedure.query(async () => {
+      const { getEstatisticasIA } = await import("./aiSystem");
+      return getEstatisticasIA();
+    }),
+    marcarCorreto: publicProcedure
+      .input(z.object({ padraoId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { marcarPadraoCorreto } = await import("./aiSystem");
+        await marcarPadraoCorreto(input.padraoId);
+        return { success: true };
+      }),
+  }),
   missoes: router({
     list: publicProcedure.query(async () => {
       const { getAllMissoes } = await import("./db");

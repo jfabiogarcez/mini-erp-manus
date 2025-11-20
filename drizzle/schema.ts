@@ -85,6 +85,53 @@ export type Evento = typeof eventos.$inferSelect;
 export type InsertEvento = typeof eventos.$inferInsert;
 
 /**
+ * Tabela de configuração da IA
+ */
+export const configuracaoIA = mysqlTable("configuracaoIA", {
+  id: int("id").autoincrement().primaryKey(),
+  iaLigada: int("iaLigada").default(0).notNull(), // Boolean (0 = desligada/aprendendo, 1 = ligada/executando)
+  confiancaMinima: int("confiancaMinima").default(80).notNull(), // % de confiança mínima para executar ações
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ConfiguracaoIA = typeof configuracaoIA.$inferSelect;
+export type InsertConfiguracaoIA = typeof configuracaoIA.$inferInsert;
+
+/**
+ * Tabela de ações do usuário (para aprendizado)
+ */
+export const acoesUsuario = mysqlTable("acoesUsuario", {
+  id: int("id").autoincrement().primaryKey(),
+  tipoAcao: varchar("tipoAcao", { length: 50 }).notNull(), // criar_missao, criar_tarefa, categorizar_registro, etc.
+  contexto: text("contexto").notNull(), // JSON com dados da ação
+  resultado: text("resultado"), // JSON com resultado da ação
+  userId: int("userId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AcaoUsuario = typeof acoesUsuario.$inferSelect;
+export type InsertAcaoUsuario = typeof acoesUsuario.$inferInsert;
+
+/**
+ * Tabela de padrões aprendidos pela IA
+ */
+export const padroesAprendidos = mysqlTable("padroesAprendidos", {
+  id: int("id").autoincrement().primaryKey(),
+  tipoPadrao: varchar("tipoPadrao", { length: 50 }).notNull(), // regra_categorizacao, regra_agendamento, etc.
+  condicao: text("condicao").notNull(), // JSON com condições para aplicar o padrão
+  acao: text("acao").notNull(), // JSON com ação a ser executada
+  confianca: int("confianca").default(0).notNull(), // % de confiança (0-100)
+  vezesAplicado: int("vezesAplicado").default(0).notNull(), // Contador de vezes que foi aplicado
+  vezesCorreto: int("vezesCorreto").default(0).notNull(), // Contador de vezes que foi correto
+  ativo: int("ativo").default(1).notNull(), // Boolean (0 = inativo, 1 = ativo)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PadraoAprendido = typeof padroesAprendidos.$inferSelect;
+export type InsertPadraoAprendido = typeof padroesAprendidos.$inferInsert;
+
+/**
  * Tabela de registros consolidados do mini-ERP.
  * Armazena dados extraídos de planilhas enviadas por e-mail/WhatsApp.
  */

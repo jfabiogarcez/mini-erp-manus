@@ -36,6 +36,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function Dashboard() {
   const { data: registros, isLoading: loadingRegistros, refetch: refetchRegistros } = trpc.registros.list.useQuery();
   const { data: tarefas, isLoading: loadingTarefas, refetch: refetchTarefas } = trpc.tarefas.list.useQuery();
+  const { data: iaConfig } = trpc.ia.getConfig.useQuery();
+  const { data: iaStats } = trpc.ia.getEstatisticas.useQuery();
+  const toggleIA = trpc.ia.toggle.useMutation({
+    onSuccess: () => {
+      trpc.useUtils().ia.getConfig.invalidate();
+      trpc.useUtils().ia.getEstatisticas.invalidate();
+      toast.success("Modo da IA alterado com sucesso!");
+    },
+  });
   const createRegistroMutation = trpc.registros.create.useMutation();
   const updateRegistroMutation = trpc.registros.update.useMutation();
   const deleteRegistroMutation = trpc.registros.delete.useMutation();
@@ -327,6 +336,53 @@ export default function Dashboard() {
                 </form>
               </DialogContent>
             </Dialog>
+          </div>
+
+          {/* Botão de Toggle da IA */}
+          <div className="mb-6 p-6 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">IA Adaptativa 🤖</h3>
+                <p className="text-purple-100 text-sm">
+                  {iaConfig?.iaLigada === 1 
+                    ? "🟫 Modo Automático - Executando ações aprendidas" 
+                    : "🧠 Modo Aprendizado - Registrando suas ações"}
+                </p>
+              </div>
+              <button
+                onClick={() => toggleIA.mutate()}
+                disabled={toggleIA.isPending}
+                className={`relative inline-flex h-12 w-24 items-center rounded-full transition-colors ${
+                  iaConfig?.iaLigada === 1 ? "bg-green-500" : "bg-gray-600"
+                } disabled:opacity-50`}
+              >
+                <span
+                  className={`inline-block h-10 w-10 transform rounded-full bg-white shadow-lg transition-transform ${
+                    iaConfig?.iaLigada === 1 ? "translate-x-12" : "translate-x-1"
+                  }`}
+                >
+                  <span className="flex h-full w-full items-center justify-center text-2xl">
+                    {iaConfig?.iaLigada === 1 ? "🟫" : "🔴"}
+                  </span>
+                </span>
+              </button>
+            </div>
+            {iaStats && (
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="bg-white/20 rounded-lg p-3">
+                  <p className="text-xs text-purple-100">Ações Registradas</p>
+                  <p className="text-2xl font-bold text-white">{iaStats.totalAcoesRegistradas}</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3">
+                  <p className="text-xs text-purple-100">Padrões Aprendidos</p>
+                  <p className="text-2xl font-bold text-white">{iaStats.totalPadroesAprendidos}</p>
+                </div>
+                <div className="bg-white/20 rounded-lg p-3">
+                  <p className="text-xs text-purple-100">Alta Confiança</p>
+                  <p className="text-2xl font-bold text-white">{iaStats.padroesAltaConfianca}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Metrics Cards */}

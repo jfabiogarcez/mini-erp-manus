@@ -129,3 +129,36 @@
 - [ ] Finalizar webhook do WhatsApp para processar arquivos
 - [ ] Testar fluxo completo de ponta a ponta
 - [ ] Criar documentação de uso
+
+## Sistema de IA Adaptativa
+
+### Fase 1: Banco de Dados de Aprendizado
+- [x] Criar tabela `acoes_usuario` para registrar todas as ações
+- [x] Criar tabela `padroes_aprendidos` para armazenar regras identificadas
+- [x] Criar tabela `configuracao_ia` para armazenar estado (ligada/desligada)
+- [x] Implementar CRUD de ações e padrões
+
+### Fase 2: Sistema de Captura e Aprendizado
+- [x] Implementar middleware para capturar ações do usuário
+- [x] Criar algoritmo de identificação de padrões
+- [x] Implementar sistema de análise de frequência de ações
+- [x] Criar gerador de regras automáticas baseado em padrões
+
+### Fase 3: Interface de Controle da IA
+- [x] Criar botão de toggle (Liga/Desliga) no dashboard
+- [x] Adicionar indicador visual do modo atual (🔴/🟫)
+- [x] Criar painel de estatísticas da IA
+- [x] Implementar painel de confiança (% de certeza)
+- [ ] Adicionar histórico de ações automáticas
+
+### Fase 4: Motor de Execução Automática
+- [ ] Implementar executor de ações baseado em padrões
+- [ ] Criar sistema de validação de confiança antes de executar
+- [ ] Implementar possibilidade de reverter ações automáticas
+- [ ] Criar notificações de ações executadas automaticamente
+
+### Fase 5: Testes e Checkpoint
+- [ ] Testar modo de aprendizado
+- [ ] Testar modo automático
+- [ ] Validar reversão de ações
+- [ ] Criar checkpoint final
