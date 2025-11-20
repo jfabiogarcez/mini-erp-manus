@@ -79,6 +79,14 @@ export const appRouter = router({
       return { success: true };
     }),
   }),
+  notificacoes: router({
+    verificarTarefasProximas: publicProcedure
+      .input(z.object({ diasAntecedencia: z.number().optional() }))
+      .mutation(async ({ input }) => {
+        const { verificarTarefasProximasVencimento } = await import("./notifications");
+        return verificarTarefasProximasVencimento(input.diasAntecedencia);
+      }),
+  }),
   tarefas: router({
     list: publicProcedure.query(async () => {
       const { getAllTarefas } = await import("./db");

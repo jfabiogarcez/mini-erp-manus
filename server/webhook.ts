@@ -116,4 +116,30 @@ router.post("/consolidar", async (req, res) => {
   }
 });
 
+/**
+ * Endpoint de agendamento para verificação periódica de tarefas próximas do vencimento.
+ * GET /api/webhook/verificar-tarefas?diasAntecedencia=3
+ * 
+ * Query params:
+ * - diasAntecedencia: Número de dias de antecedência para o alerta (padrão: 3)
+ */
+router.get("/verificar-tarefas", async (req, res) => {
+  try {
+    const diasAntecedencia = req.query.diasAntecedencia
+      ? parseInt(req.query.diasAntecedencia as string)
+      : 3;
+
+    const { verificarTarefasProximasVencimento } = await import("./notifications");
+    const resultado = await verificarTarefasProximasVencimento(diasAntecedencia);
+
+    return res.json(resultado);
+  } catch (error) {
+    console.error("Erro no endpoint de verificação de tarefas:", error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Erro interno do servidor",
+    });
+  }
+});
+
 export default router;

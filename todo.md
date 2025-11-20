@@ -32,10 +32,28 @@
 ### Fase 5: Testes e Checkpoint
 - [x] Testar CRUD de registros via interface
 - [x] Testar criação de tarefas automáticas
-- [ ] Testar webhook de integração com dados simulados
-- [ ] Criar checkpoint final do projeto
+- [x] Testar webhook de integração com dados simulados
+- [x] Criar checkpoint final do projeto
 
 ### Fase 6: Entrega
-- [ ] Documentar instruções de uso do sistema
-- [ ] Documentar como configurar o Manus para enviar dados ao webhook
-- [ ] Entregar ao usuário com exemplos de uso
+- [x] Documentar instruções de uso do sistema
+- [x] Documentar como configurar o Manus para enviar dados ao webhook
+- [x] Entregar ao usuário com exemplos de uso
+
+## Nova Funcionalidade: Sistema de Notificações por E-mail
+
+### Implementação
+- [x] Criar função para verificar tarefas próximas do vencimento (3 dias)
+- [x] Implementar envio de e-mail usando API do Manus
+- [x] Criar endpoint de agendamento para verificação periódica
+- [ ] Adicionar testes para o sistema de notificações
+- [ ] Documentar o uso do sistema de notificações
+
+## Melhoria de Layout: Dashboard Intuitivo
+
+### Implementação
+- [x] Adicionar navegação lateral com seções (Registros, Tarefas, Notificações)
+- [x] Criar cards de resumo com estatísticas (total de registros, tarefas pendentes, etc.)
+- [x] Adicionar filtros visuais por categoria e status
+- [x] Criar visualização dedicada para tarefas com indicadores de urgência
+- [x] Garantir design responsivo para dispositivos móveis

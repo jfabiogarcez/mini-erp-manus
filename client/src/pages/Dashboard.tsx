@@ -8,23 +8,43 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { 
+  Loader2, 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  LayoutDashboard,
+  ClipboardList,
+  Bell,
+  DollarSign,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Search,
+  Filter
+} from "lucide-react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Dashboard() {
-  const { data: registros, isLoading, refetch } = trpc.registros.list.useQuery();
-  const createMutation = trpc.registros.create.useMutation();
-  const updateMutation = trpc.registros.update.useMutation();
-  const deleteMutation = trpc.registros.delete.useMutation();
+  const { data: registros, isLoading: loadingRegistros, refetch: refetchRegistros } = trpc.registros.list.useQuery();
+  const { data: tarefas, isLoading: loadingTarefas, refetch: refetchTarefas } = trpc.tarefas.list.useQuery();
+  const createRegistroMutation = trpc.registros.create.useMutation();
+  const updateRegistroMutation = trpc.registros.update.useMutation();
+  const deleteRegistroMutation = trpc.registros.delete.useMutation();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategoria, setFilterCategoria] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [formData, setFormData] = useState({
     assunto: "",
     categoria: "",
@@ -35,19 +55,63 @@ export default function Dashboard() {
     observacoes: "",
   });
 
+  // Calcular métricas
+  const metricas = useMemo(() => {
+    if (!registros || !tarefas) return null;
+    
+    const totalRegistros = registros.length;
+    const valorTotal = registros.reduce((acc, r) => acc + (r.valorTotal || 0), 0);
+    const tarefasPendentes = tarefas.filter(t => t.status === "Pendente").length;
+    
+    // Tarefas próximas do vencimento (3 dias)
+    const hoje = new Date();
+    const dataLimite = new Date();
+    dataLimite.setDate(dataLimite.getDate() + 3);
+    
+    const tarefasProximas = tarefas.filter(t => {
+      if (t.status !== "Pendente") return false;
+      const venc = new Date(t.dataVencimento);
+      return venc >= hoje && venc <= dataLimite;
+    }).length;
+
+    return {
+      totalRegistros,
+      valorTotal,
+      tarefasPendentes,
+      tarefasProximas,
+    };
+  }, [registros, tarefas]);
+
+  // Filtrar registros
+  const registrosFiltrados = useMemo(() => {
+    if (!registros) return [];
+    
+    return registros.filter(r => {
+      const matchSearch = searchTerm === "" || 
+        r.assunto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (r.clienteFornecedor || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (r.nDocumentoPedido || "").toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchCategoria = filterCategoria === "all" || r.categoria === filterCategoria;
+      const matchStatus = filterStatus === "all" || r.status === filterStatus;
+      
+      return matchSearch && matchCategoria && matchStatus;
+    });
+  }, [registros, searchTerm, filterCategoria, filterStatus]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (editingId) {
-        await updateMutation.mutateAsync({ id: editingId, ...formData });
+        await updateRegistroMutation.mutateAsync({ id: editingId, ...formData });
         toast.success("Registro atualizado com sucesso!");
       } else {
-        await createMutation.mutateAsync(formData);
+        await createRegistroMutation.mutateAsync(formData);
         toast.success("Registro criado com sucesso!");
       }
       setIsDialogOpen(false);
       resetForm();
-      refetch();
+      refetchRegistros();
     } catch (error) {
       toast.error("Erro ao salvar registro");
     }
@@ -70,9 +134,9 @@ export default function Dashboard() {
   const handleDelete = async (id: number) => {
     if (confirm("Tem certeza que deseja deletar este registro?")) {
       try {
-        await deleteMutation.mutateAsync({ id });
+        await deleteRegistroMutation.mutateAsync({ id });
         toast.success("Registro deletado com sucesso!");
-        refetch();
+        refetchRegistros();
       } catch (error) {
         toast.error("Erro ao deletar registro");
       }
@@ -93,12 +157,13 @@ export default function Dashboard() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      Pendente: "outline",
-      Pago: "default",
-      Realizado: "secondary",
+    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", className: string }> = {
+      Pendente: { variant: "outline", className: "border-yellow-500 text-yellow-700" },
+      Pago: { variant: "default", className: "bg-green-500 hover:bg-green-600" },
+      Realizado: { variant: "secondary", className: "bg-blue-500 hover:bg-blue-600 text-white" },
     };
-    return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
+    const config = variants[status] || variants.Pendente;
+    return <Badge variant={config.variant} className={config.className}>{status}</Badge>;
   };
 
   const formatCurrency = (value: number) => {
@@ -108,181 +173,350 @@ export default function Dashboard() {
     }).format(value / 100);
   };
 
-  if (isLoading) {
+  const getTarefaUrgencia = (dataVencimento: Date) => {
+    const hoje = new Date();
+    const venc = new Date(dataVencimento);
+    const diff = Math.ceil((venc.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diff < 0) return { icon: AlertCircle, color: "text-red-500", label: "Atrasada" };
+    if (diff <= 3) return { icon: Clock, color: "text-yellow-500", label: "Urgente" };
+    return { icon: CheckCircle2, color: "text-green-500", label: "No prazo" };
+  };
+
+  if (loadingRegistros || loadingTarefas) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Mini-ERP</h1>
-            <p className="text-muted-foreground">Gestão de Registros Consolidados</p>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetForm();
-          }}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Novo Registro
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>{editingId ? "Editar Registro" : "Novo Registro"}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="assunto">Assunto *</Label>
-                    <Input
-                      id="assunto"
-                      value={formData.assunto}
-                      onChange={(e) => setFormData({ ...formData, assunto: e.target.value })}
-                      required
-                    />
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 p-6">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Mini-ERP</h1>
+          <p className="text-sm text-gray-500">Automação Manus</p>
+        </div>
+        <nav className="space-y-2">
+          <a href="#overview" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 font-medium">
+            <LayoutDashboard className="h-5 w-5" />
+            Visão Geral
+          </a>
+          <a href="#registros" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+            <ClipboardList className="h-5 w-5" />
+            Registros
+          </a>
+          <a href="#tarefas" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+            <Bell className="h-5 w-5" />
+            Tarefas
+          </a>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="ml-64 p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Visão Geral</h2>
+              <p className="text-gray-500">Gerencie seus registros e tarefas em um único lugar</p>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) resetForm();
+            }}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Novo Registro
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{editingId ? "Editar Registro" : "Novo Registro"}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="assunto">Assunto *</Label>
+                      <Input
+                        id="assunto"
+                        value={formData.assunto}
+                        onChange={(e) => setFormData({ ...formData, assunto: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="categoria">Categoria *</Label>
+                      <Select
+                        value={formData.categoria}
+                        onValueChange={(value) => setFormData({ ...formData, categoria: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Missão/Viagem">Missão/Viagem</SelectItem>
+                          <SelectItem value="Contas a Pagar">Contas a Pagar</SelectItem>
+                          <SelectItem value="Controle de Caixa/Aporte">Controle de Caixa/Aporte</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="clienteFornecedor">Cliente/Fornecedor</Label>
+                      <Input
+                        id="clienteFornecedor"
+                        value={formData.clienteFornecedor}
+                        onChange={(e) => setFormData({ ...formData, clienteFornecedor: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="nDocumentoPedido">Nº Documento/Pedido</Label>
+                      <Input
+                        id="nDocumentoPedido"
+                        value={formData.nDocumentoPedido}
+                        onChange={(e) => setFormData({ ...formData, nDocumentoPedido: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="valorTotal">Valor Total (R$)</Label>
+                      <Input
+                        id="valorTotal"
+                        type="number"
+                        step="0.01"
+                        value={formData.valorTotal / 100}
+                        onChange={(e) => setFormData({ ...formData, valorTotal: Math.round(parseFloat(e.target.value) * 100) })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Status</Label>
+                      <Select
+                        value={formData.status}
+                        onValueChange={(value) => setFormData({ ...formData, status: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pendente">Pendente</SelectItem>
+                          <SelectItem value="Pago">Pago</SelectItem>
+                          <SelectItem value="Realizado">Realizado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="categoria">Categoria *</Label>
-                    <Select
-                      value={formData.categoria}
-                      onValueChange={(value) => setFormData({ ...formData, categoria: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
+                    <Label htmlFor="observacoes">Observações</Label>
+                    <Input
+                      id="observacoes"
+                      value={formData.observacoes}
+                      onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit">
+                      {editingId ? "Atualizar" : "Criar"}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Metrics Cards */}
+          {metricas && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">Total de Registros</CardTitle>
+                  <ClipboardList className="h-4 w-4 text-gray-400" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900">{metricas.totalRegistros}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">Valor Total</CardTitle>
+                  <DollarSign className="h-4 w-4 text-gray-400" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900">{formatCurrency(metricas.valorTotal)}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">Tarefas Pendentes</CardTitle>
+                  <Clock className="h-4 w-4 text-gray-400" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900">{metricas.tarefasPendentes}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">Tarefas Urgentes</CardTitle>
+                  <AlertCircle className="h-4 w-4 text-yellow-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-yellow-600">{metricas.tarefasProximas}</div>
+                  <p className="text-xs text-gray-500 mt-1">Próximas 72h</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Tabs */}
+          <Tabs defaultValue="registros" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="registros">Registros</TabsTrigger>
+              <TabsTrigger value="tarefas">Tarefas</TabsTrigger>
+            </TabsList>
+
+            {/* Registros Tab */}
+            <TabsContent value="registros" className="space-y-4">
+              {/* Filters */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex gap-4">
+                    <div className="flex-1 relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Buscar por assunto, cliente ou documento..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <Select value={filterCategoria} onValueChange={setFilterCategoria}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Categoria" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="all">Todas Categorias</SelectItem>
                         <SelectItem value="Missão/Viagem">Missão/Viagem</SelectItem>
                         <SelectItem value="Contas a Pagar">Contas a Pagar</SelectItem>
                         <SelectItem value="Controle de Caixa/Aporte">Controle de Caixa/Aporte</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="clienteFornecedor">Cliente/Fornecedor</Label>
-                    <Input
-                      id="clienteFornecedor"
-                      value={formData.clienteFornecedor}
-                      onChange={(e) => setFormData({ ...formData, clienteFornecedor: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="nDocumentoPedido">Nº Documento/Pedido</Label>
-                    <Input
-                      id="nDocumentoPedido"
-                      value={formData.nDocumentoPedido}
-                      onChange={(e) => setFormData({ ...formData, nDocumentoPedido: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="valorTotal">Valor Total (R$)</Label>
-                    <Input
-                      id="valorTotal"
-                      type="number"
-                      step="0.01"
-                      value={formData.valorTotal / 100}
-                      onChange={(e) => setFormData({ ...formData, valorTotal: Math.round(parseFloat(e.target.value) * 100) })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(value) => setFormData({ ...formData, status: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Status" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="all">Todos Status</SelectItem>
                         <SelectItem value="Pendente">Pendente</SelectItem>
                         <SelectItem value="Pago">Pago</SelectItem>
                         <SelectItem value="Realizado">Realizado</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Input
-                    id="observacoes"
-                    value={formData.observacoes}
-                    onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit">
-                    {editingId ? "Atualizar" : "Criar"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                </CardContent>
+              </Card>
 
-        <div className="bg-card rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Assunto</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Cliente/Fornecedor</TableHead>
-                <TableHead>Nº Documento</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {registros && registros.length > 0 ? (
-                registros.map((registro) => (
-                  <TableRow key={registro.id}>
-                    <TableCell className="font-medium">{registro.assunto}</TableCell>
-                    <TableCell>{registro.categoria}</TableCell>
-                    <TableCell>{registro.clienteFornecedor || "-"}</TableCell>
-                    <TableCell>{registro.nDocumentoPedido || "-"}</TableCell>
-                    <TableCell>{formatCurrency(registro.valorTotal || 0)}</TableCell>
-                    <TableCell>{getStatusBadge(registro.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(registro)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(registro.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
-                    Nenhum registro encontrado. Clique em "Novo Registro" para adicionar.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              {/* Table */}
+              <Card>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Assunto</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Cliente/Fornecedor</TableHead>
+                      <TableHead>Nº Documento</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {registrosFiltrados && registrosFiltrados.length > 0 ? (
+                      registrosFiltrados.map((registro) => (
+                        <TableRow key={registro.id} className="hover:bg-gray-50">
+                          <TableCell className="font-medium">{registro.assunto}</TableCell>
+                          <TableCell>{registro.categoria}</TableCell>
+                          <TableCell>{registro.clienteFornecedor || "-"}</TableCell>
+                          <TableCell>{registro.nDocumentoPedido || "-"}</TableCell>
+                          <TableCell>{formatCurrency(registro.valorTotal || 0)}</TableCell>
+                          <TableCell>{getStatusBadge(registro.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEdit(registro)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(registro.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-gray-500 py-8">
+                          Nenhum registro encontrado.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+
+            {/* Tarefas Tab */}
+            <TabsContent value="tarefas" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tarefas Pendentes</CardTitle>
+                  <CardDescription>Gerencie suas tarefas e prazos</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {tarefas && tarefas.filter(t => t.status === "Pendente").length > 0 ? (
+                      tarefas.filter(t => t.status === "Pendente").map((tarefa) => {
+                        const urgencia = getTarefaUrgencia(tarefa.dataVencimento);
+                        const Icon = urgencia.icon;
+                        return (
+                          <div key={tarefa.id} className="flex items-start gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                            <Icon className={`h-5 w-5 mt-0.5 ${urgencia.color}`} />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-900">{tarefa.titulo}</h4>
+                              <p className="text-sm text-gray-500 mt-1">{tarefa.descricao}</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <span className="text-xs text-gray-500">
+                                  Vencimento: {new Date(tarefa.dataVencimento).toLocaleDateString("pt-BR")}
+                                </span>
+                                <Badge variant="outline" className={urgencia.color}>
+                                  {urgencia.label}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-center text-gray-500 py-8">Nenhuma tarefa pendente.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
