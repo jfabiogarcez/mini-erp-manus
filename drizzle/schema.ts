@@ -266,3 +266,76 @@ export const linksCobranca = mysqlTable("linksCobranca", {
 
 export type LinkCobranca = typeof linksCobranca.$inferSelect;
 export type InsertLinkCobranca = typeof linksCobranca.$inferInsert;
+
+/**
+ * Tabela de aprendizados da IA
+ * Armazena conhecimentos e padrões que a IA aprende automaticamente
+ */
+export const aprendizados = mysqlTable("aprendizados", {
+  id: int("id").autoincrement().primaryKey(),
+  titulo: varchar("titulo", { length: 255 }).notNull(),
+  descricao: text("descricao").notNull(),
+  categoria: varchar("categoria", { length: 100 }), // Ex: "Multas", "Tarefas", "Registros"
+  ordem: int("ordem").default(0), // Para ordenação customizada
+  ativo: int("ativo").default(1).notNull(),
+  aprendidoAutomaticamente: int("aprendidoAutomaticamente").default(0), // 1 se foi aprendido pela IA, 0 se foi manual
+  confianca: int("confianca").default(100), // Nível de confiança 0-100
+  vezesAplicado: int("vezesAplicado").default(0), // Contador de vezes que foi usado
+  ultimaAplicacao: timestamp("ultimaAplicacao"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Aprendizado = typeof aprendizados.$inferSelect;
+export type InsertAprendizado = typeof aprendizados.$inferInsert;
+
+/**
+ * Tabela de modelos de documentos
+ * Armazena templates de orçamentos, contratos, propostas, etc.
+ */
+export const modelos = mysqlTable("modelos", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  descricao: text("descricao"),
+  categoria: mysqlEnum("categoria", [
+    "Orçamento",
+    "Contrato",
+    "Proposta",
+    "Relatório",
+    "Carta",
+    "Outros"
+  ]).default("Outros").notNull(),
+  arquivoUrl: text("arquivoUrl").notNull(), // URL do arquivo no S3
+  arquivoNome: varchar("arquivoNome", { length: 255 }),
+  tipoArquivo: varchar("tipoArquivo", { length: 100 }), // DOCX, PDF, etc.
+  camposVariaveis: text("camposVariaveis"), // JSON com campos que podem ser preenchidos
+  ativo: int("ativo").default(1).notNull(),
+  vezesUsado: int("vezesUsado").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Modelo = typeof modelos.$inferSelect;
+export type InsertModelo = typeof modelos.$inferInsert;
+
+/**
+ * Tabela de documentos gerados a partir de modelos
+ */
+export const documentosGerados = mysqlTable("documentosGerados", {
+  id: int("id").autoincrement().primaryKey(),
+  modeloId: int("modeloId").references(() => modelos.id, { onDelete: "set null" }),
+  nomeDocumento: varchar("nomeDocumento", { length: 255 }).notNull(),
+  arquivoUrl: text("arquivoUrl").notNull(),
+  destinatarioNome: varchar("destinatarioNome", { length: 255 }),
+  destinatarioEmail: varchar("destinatarioEmail", { length: 320 }),
+  destinatarioTelefone: varchar("destinatarioTelefone", { length: 50 }),
+  dadosPreenchidos: text("dadosPreenchidos"), // JSON com os dados que foram preenchidos
+  statusEnvio: mysqlEnum("statusEnvio", ["Não Enviado", "Enviado Email", "Enviado WhatsApp", "Ambos"]).default("Não Enviado"),
+  dataEnvio: timestamp("dataEnvio"),
+  observacoes: text("observacoes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DocumentoGerado = typeof documentosGerados.$inferSelect;
+export type InsertDocumentoGerado = typeof documentosGerados.$inferInsert;

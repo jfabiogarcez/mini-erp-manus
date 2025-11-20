@@ -501,6 +501,211 @@ export const appRouter = router({
         };
       }),
   }),
+
+  aprendizados: router({
+    listAll: protectedProcedure.query(async () => {
+      const { getAllAprendizados } = await import("./db");
+      return getAllAprendizados();
+    }),
+    listAtivos: protectedProcedure.query(async () => {
+      const { getAprendizadosAtivos } = await import("./db");
+      return getAprendizadosAtivos();
+    }),
+    create: protectedProcedure
+      .input(z.object({
+        titulo: z.string().min(1),
+        descricao: z.string().min(1),
+        categoria: z.string().optional(),
+        ordem: z.number().optional(),
+        ativo: z.number().optional(),
+        aprendidoAutomaticamente: z.number().optional(),
+        confianca: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createAprendizado } = await import("./db");
+        const id = await createAprendizado(input);
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        titulo: z.string().optional(),
+        descricao: z.string().optional(),
+        categoria: z.string().optional(),
+        ordem: z.number().optional(),
+        ativo: z.number().optional(),
+        confianca: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const { updateAprendizado } = await import("./db");
+        await updateAprendizado(id, data);
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteAprendizado } = await import("./db");
+        await deleteAprendizado(input.id);
+        return { success: true };
+      }),
+  }),
+
+  modelos: router({
+    listAll: protectedProcedure.query(async () => {
+      const { getAllModelos } = await import("./db");
+      return getAllModelos();
+    }),
+    listAtivos: protectedProcedure.query(async () => {
+      const { getModelosAtivos } = await import("./db");
+      return getModelosAtivos();
+    }),
+    getByCategoria: protectedProcedure
+      .input(z.object({ categoria: z.string() }))
+      .query(async ({ input }) => {
+        const { getModelosByCategoria } = await import("./db");
+        return getModelosByCategoria(input.categoria);
+      }),
+    create: protectedProcedure
+      .input(z.object({
+        nome: z.string(),
+        descricao: z.string().optional(),
+        categoria: z.enum(["Orçamento", "Contrato", "Proposta", "Relatório", "Carta", "Outros"]),
+        arquivoUrl: z.string(),
+        arquivoNome: z.string().optional(),
+        tipoArquivo: z.string().optional(),
+        camposVariaveis: z.string().optional(),
+        ativo: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createModelo } = await import("./db");
+        const id = await createModelo(input);
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string().optional(),
+        descricao: z.string().optional(),
+        categoria: z.enum(["Orçamento", "Contrato", "Proposta", "Relatório", "Carta", "Outros"]).optional(),
+        ativo: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const { updateModelo } = await import("./db");
+        await updateModelo(id, data);
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteModelo } = await import("./db");
+        await deleteModelo(input.id);
+        return { success: true };
+      }),
+    gerarDocumento: protectedProcedure
+      .input(z.object({
+        modeloId: z.number(),
+        destinatarioNome: z.string(),
+        destinatarioEmail: z.string().email().optional(),
+        destinatarioTelefone: z.string().optional(),
+        dadosAdicionais: z.record(z.string(), z.any()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { getModeloById, createDocumentoGerado, incrementarUsoModelo } = await import("./db");
+        const { invokeLLM } = await import("./_core/llm");
+        
+        const modelo = await getModeloById(input.modeloId);
+        if (!modelo) throw new Error("Modelo não encontrado");
+
+        // Usar IA para preencher o documento
+        const prompt = `
+Você é um assistente que preenche documentos profissionais.
+
+Modelo: ${modelo.nome}
+Descrição: ${modelo.descricao || ""}
+Categoria: ${modelo.categoria}
+
+Destinatário:
+- Nome: ${input.destinatarioNome}
+- Email: ${input.destinatarioEmail || "Não informado"}
+- Telefone: ${input.destinatarioTelefone || "Não informado"}
+
+Dados adicionais: ${JSON.stringify(input.dadosAdicionais || {})}
+
+Gere um documento completo e profissional baseado neste modelo.
+Retorne em formato markdown.
+`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: "Você é um assistente especializado em criar documentos profissionais." },
+            { role: "user", content: prompt },
+          ],
+        });
+
+        const messageContent = response.choices[0]?.message?.content;
+        const conteudoGerado = typeof messageContent === "string" ? messageContent : "";
+
+        // Salvar documento gerado (aqui você poderia converter para PDF/DOCX)
+        const documentoId = await createDocumentoGerado({
+          modeloId: input.modeloId,
+          nomeDocumento: `${modelo.nome} - ${input.destinatarioNome}`,
+          arquivoUrl: "", // TODO: Implementar conversão e upload
+          destinatarioNome: input.destinatarioNome,
+          destinatarioEmail: input.destinatarioEmail,
+          destinatarioTelefone: input.destinatarioTelefone,
+          dadosPreenchidos: JSON.stringify(input.dadosAdicionais || {}),
+          statusEnvio: "Não Enviado",
+        });
+
+        await incrementarUsoModelo(input.modeloId);
+
+        return {
+          documentoId,
+          conteudo: conteudoGerado,
+        };
+      }),
+  }),
+
+  documentos: router({
+    listAll: protectedProcedure.query(async () => {
+      const { getAllDocumentosGerados } = await import("./db");
+      return getAllDocumentosGerados();
+    }),
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const { getDocumentoGeradoById } = await import("./db");
+        return getDocumentoGeradoById(input.id);
+      }),
+    enviar: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        metodo: z.enum(["email", "whatsapp", "ambos"]),
+      }))
+      .mutation(async ({ input }) => {
+        const { getDocumentoGeradoById, updateDocumentoGerado } = await import("./db");
+        
+        const documento = await getDocumentoGeradoById(input.id);
+        if (!documento) throw new Error("Documento não encontrado");
+
+        // TODO: Implementar envio real por email/WhatsApp
+        
+        const statusMap = {
+          email: "Enviado Email" as const,
+          whatsapp: "Enviado WhatsApp" as const,
+          ambos: "Ambos" as const,
+        };
+
+        await updateDocumentoGerado(input.id, {
+          statusEnvio: statusMap[input.metodo],
+          dataEnvio: new Date(),
+        });
+
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

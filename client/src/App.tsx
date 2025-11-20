@@ -9,6 +9,8 @@ import Equipe from "./pages/Equipe";
 import Multas from "./pages/Multas";
 import Dashboard from "./pages/Dashboard";
 import Cobranca from "./pages/Cobranca";
+import Aprendizados from "./pages/Aprendizados";
+import Modelos from "./pages/Modelos";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -18,6 +20,8 @@ function Router() {
       <Route path={"/equipe"} component={Equipe} />
       <Route path={"/multas"} component={Multas} />
       <Route path={"/cobranca"} component={Cobranca} />
+      <Route path={"/aprendizados"} component={Aprendizados} />
+      <Route path={"/modelos"} component={Modelos} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

@@ -531,3 +531,182 @@ export async function updateLinkCobrancaBySessionId(sessionId: string, data: any
   const { linksCobranca } = await import("../drizzle/schema");
   await db.update(linksCobranca).set(data).where(eq(linksCobranca.stripeCheckoutSessionId, sessionId));
 }
+
+// ===== Funções de Aprendizados da IA =====
+
+export async function getAllAprendizados() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { aprendizados } = await import("../drizzle/schema");
+  return db.select().from(aprendizados).orderBy(aprendizados.ordem, aprendizados.id);
+}
+
+export async function getAprendizadosAtivos() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { aprendizados } = await import("../drizzle/schema");
+  return db.select().from(aprendizados).where(eq(aprendizados.ativo, 1)).orderBy(aprendizados.ordem, aprendizados.id);
+}
+
+export async function getAprendizadoById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { aprendizados } = await import("../drizzle/schema");
+  const result = await db.select().from(aprendizados).where(eq(aprendizados.id, id)).limit(1);
+  return result[0];
+}
+
+export async function createAprendizado(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { aprendizados } = await import("../drizzle/schema");
+  const result = await db.insert(aprendizados).values(data);
+  return Number((result as any).insertId);
+}
+
+export async function updateAprendizado(id: number, data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { aprendizados } = await import("../drizzle/schema");
+  await db.update(aprendizados).set(data).where(eq(aprendizados.id, id));
+}
+
+export async function deleteAprendizado(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { aprendizados } = await import("../drizzle/schema");
+  await db.delete(aprendizados).where(eq(aprendizados.id, id));
+}
+
+export async function incrementarUsoAprendizado(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { aprendizados } = await import("../drizzle/schema");
+  const aprendizado = await getAprendizadoById(id);
+  if (aprendizado) {
+    await db.update(aprendizados)
+      .set({ 
+        vezesAplicado: (aprendizado.vezesAplicado || 0) + 1,
+        ultimaAplicacao: new Date(),
+      })
+      .where(eq(aprendizados.id, id));
+  }
+}
+
+// ===== Funções de Modelos de Documentos =====
+
+export async function getAllModelos() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { modelos } = await import("../drizzle/schema");
+  return db.select().from(modelos).orderBy(modelos.categoria, modelos.nome);
+}
+
+export async function getModelosAtivos() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { modelos } = await import("../drizzle/schema");
+  return db.select().from(modelos).where(eq(modelos.ativo, 1)).orderBy(modelos.categoria, modelos.nome);
+}
+
+export async function getModelosByCategoria(categoria: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { modelos } = await import("../drizzle/schema");
+  return db.select().from(modelos)
+    .where(eq(modelos.categoria, categoria as any))
+    .orderBy(modelos.nome);
+}
+
+export async function getModeloById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { modelos } = await import("../drizzle/schema");
+  const result = await db.select().from(modelos).where(eq(modelos.id, id)).limit(1);
+  return result[0];
+}
+
+export async function createModelo(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { modelos } = await import("../drizzle/schema");
+  const result = await db.insert(modelos).values(data);
+  return Number((result as any).insertId);
+}
+
+export async function updateModelo(id: number, data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { modelos } = await import("../drizzle/schema");
+  await db.update(modelos).set(data).where(eq(modelos.id, id));
+}
+
+export async function deleteModelo(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { modelos } = await import("../drizzle/schema");
+  await db.delete(modelos).where(eq(modelos.id, id));
+}
+
+export async function incrementarUsoModelo(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { modelos } = await import("../drizzle/schema");
+  const modelo = await getModeloById(id);
+  if (modelo) {
+    await db.update(modelos)
+      .set({ vezesUsado: (modelo.vezesUsado || 0) + 1 })
+      .where(eq(modelos.id, id));
+  }
+}
+
+// ===== Funções de Documentos Gerados =====
+
+export async function getAllDocumentosGerados() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { documentosGerados } = await import("../drizzle/schema");
+  return db.select().from(documentosGerados).orderBy(desc(documentosGerados.createdAt));
+}
+
+export async function getDocumentoGeradoById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { documentosGerados } = await import("../drizzle/schema");
+  const result = await db.select().from(documentosGerados).where(eq(documentosGerados.id, id)).limit(1);
+  return result[0];
+}
+
+export async function createDocumentoGerado(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { documentosGerados } = await import("../drizzle/schema");
+  const result = await db.insert(documentosGerados).values(data);
+  return Number((result as any).insertId);
+}
+
+export async function updateDocumentoGerado(id: number, data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { documentosGerados } = await import("../drizzle/schema");
+  await db.update(documentosGerados).set(data).where(eq(documentosGerados.id, id));
+}

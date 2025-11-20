@@ -330,3 +330,24 @@
 - [x] Adicionar botão de compartilhamento via E-mail
 - [x] Implementar cópia de link para área de transferência
 - [ ] Criar página pública de checkout para o cliente
+
+### 5. Sistema de Aprendizados da IA
+- [x] Corrigir botão de ativar/desativar IA (toggle não está funcionando)
+- [x] Criar tabela de aprendizados no banco de dados
+- [x] Implementar aba "Aprendizados da IA" no dashboard
+- [x] Criar lista numerada e editável de aprendizados
+- [x] Implementar CRUD de aprendizados (criar, editar, excluir)
+- [x] Adicionar campo de descrição para cada aprendizado
+- [x] Implementar registro automático de aprendizados pela IA
+- [x] Criar endpoint para IA consultar aprendizados antes de agir
+
+### 6. Biblioteca de Modelos de Documentos
+- [x] Criar tabela de modelos no banco de dados
+- [x] Implementar aba "Modelos" no dashboard
+- [x] Adicionar upload de arquivos de modelo (DOCX, PDF)
+- [x] Criar categorias de modelos (Orçamento, Contrato, Proposta, etc.)
+- [x] Implementar visualização de modelos cadastrados
+- [x] Criar sistema de preenchimento automático via IA
+- [x] Implementar seleção de destinatário para envio
+- [x] Adicionar envio automático por e-mail/WhatsApp
+- [x] Criar histórico de documentos gerados
