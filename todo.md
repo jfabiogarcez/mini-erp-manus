@@ -192,3 +192,47 @@
 - [ ] Testar cadastro de membros
 - [ ] Testar upload de arquivos
 - [ ] Criar checkpoint final
+
+## Implementação Completa: Equipe, WhatsApp, E-mail, Calendário e Multas
+
+### Fase 1: Banco de Dados de Multas
+- [x] Criar tabela `multas` (id, numero_auto, data_infracao, hora_infracao, local_infracao, codigo_infracao, descricao_infracao, valor, pontos, veiculo_placa, motorista_id, data_vencimento, status, pdf_url, observacoes, created_at, updated_at)
+- [x] Atualizar esquema do banco de dados
+
+### Fase 2: Página de Gestão de Equipe
+- [x] Criar página de listagem de membros com cards visuais
+- [x] Criar formulário de cadastro completo com upload de foto
+- [ ] Implementar upload de documentos (RG, CNH, etc.)
+- [ ] Adicionar funcionalidade de upload de Excel para cadastro em massa
+- [x] Implementar filtros por tipo (Motorista/Segurança/Receptivo)
+
+### Fase 3: Páginas de WhatsApp e E-mail
+- [ ] Criar página de WhatsApp com histórico de mensagens
+- [ ] Criar página de E-mail com histórico de mensagens recebidas
+- [ ] Implementar processamento automático de anexos
+- [ ] Adicionar vinculação com missões existentes
+
+### Fase 4: Calendário Visual Interativo
+- [ ] Instalar e configurar FullCalendar
+- [ ] Criar componente de calendário com visualizações (mensal/semanal/diária)
+- [ ] Implementar eventos coloridos por urgência
+- [ ] Adicionar drag-and-drop para reagendar eventos
+- [ ] Sincronizar automaticamente com missões e tarefas
+- [ ] Adicionar botão "Adicionar ao Calendário" em missões, tarefas e registros
+
+### Fase 5: Módulo de Multas
+- [ ] Criar página de listagem de multas
+- [ ] Implementar upload de PDF de multas (individual)
+- [ ] Implementar upload em lote de múltiplos PDFs
+- [ ] Criar extração automática de dados do PDF usando IA
+- [ ] Adicionar formulário de cadastro manual de multas
+- [ ] Implementar vinculação com veículos e motoristas
+- [ ] Adicionar item "Multas" no menu lateral
+
+### Fase 6: Testes e Checkpoint
+- [ ] Testar cadastro de membros da equipe
+- [ ] Testar upload de Excel para cadastro em massa
+- [ ] Testar páginas de WhatsApp e E-mail
+- [ ] Testar calendário visual e sincronização
+- [ ] Testar upload de PDFs de multas e extração de dados
+- [ ] Criar checkpoint final

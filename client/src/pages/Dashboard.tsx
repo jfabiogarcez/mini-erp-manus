@@ -30,6 +30,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { useState, useMemo } from "react";
+import { Link } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -213,10 +214,10 @@ export default function Dashboard() {
           <p className="text-sm text-gray-500">Automação Manus</p>
         </div>
         <nav className="space-y-2">
-          <a href="#overview" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 font-medium">
+          <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 font-medium">
             <LayoutDashboard className="h-5 w-5" />
             Visão Geral
-          </a>
+          </Link>
           <a href="#registros" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
             <ClipboardList className="h-5 w-5" />
             Registros
@@ -234,24 +235,12 @@ export default function Dashboard() {
             E-mail
           </a>
           <div className="space-y-1">
-            <button className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+            <Link href="/equipe" className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5" />
                 Equipe
               </div>
-              <ChevronDown className="h-4 w-4" />
-            </button>
-            <div className="ml-8 space-y-1">
-              <a href="#motoristas" className="block px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded">
-                Motoristas
-              </a>
-              <a href="#seguranca" className="block px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded">
-                Segurança
-              </a>
-              <a href="#receptivo" className="block px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded">
-                Receptivo
-              </a>
-            </div>
+            </Link>
           </div>
         </nav>
       </aside>

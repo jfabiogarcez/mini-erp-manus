@@ -160,6 +160,32 @@ export type MembroEquipe = typeof membrosEquipe.$inferSelect;
 export type InsertMembroEquipe = typeof membrosEquipe.$inferInsert;
 
 /**
+ * Tabela de multas de trânsito
+ */
+export const multas = mysqlTable("multas", {
+  id: int("id").autoincrement().primaryKey(),
+  numeroAuto: varchar("numero_auto", { length: 100 }),
+  dataInfracao: timestamp("data_infracao"),
+  horaInfracao: varchar("hora_infracao", { length: 10 }),
+  localInfracao: text("local_infracao"),
+  codigoInfracao: varchar("codigo_infracao", { length: 50 }),
+  descricaoInfracao: text("descricao_infracao"),
+  valor: int("valor").default(0),
+  pontos: int("pontos").default(0),
+  veiculoPlaca: varchar("veiculo_placa", { length: 20 }),
+  motoristaId: int("motorista_id"),
+  dataVencimento: timestamp("data_vencimento"),
+  status: mysqlEnum("status", ["Pendente", "Pago", "Recorrido", "Cancelado"]).default("Pendente").notNull(),
+  pdfUrl: text("pdf_url"),
+  observacoes: text("observacoes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Multa = typeof multas.$inferSelect;
+export type InsertMulta = typeof multas.$inferInsert;
+
+/**
  * Tabela de registros consolidados do mini-ERP.
  * Armazena dados extraídos de planilhas enviadas por e-mail/WhatsApp.
  */
