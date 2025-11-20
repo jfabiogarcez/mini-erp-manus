@@ -215,6 +215,15 @@ export const appRouter = router({
     }),
   }),
   equipe: router({
+    uploadExcel: protectedProcedure
+      .input(z.object({
+        fileUrl: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // TODO: Implementar leitura do Excel e cadastro em massa
+        // Por enquanto, retorna sucesso
+        return { success: true, message: "Funcionalidade será implementada em breve" };
+      }),
     listAll: protectedProcedure.query(async () => {
       const { getAllMembrosEquipe } = await import("./db");
       return getAllMembrosEquipe();
@@ -272,6 +281,66 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const { deleteMembroEquipe } = await import("./db");
         await deleteMembroEquipe(input.id);
+        return { success: true };
+      }),
+  }),
+
+  multas: router({
+    listAll: protectedProcedure.query(async () => {
+      const { getAllMultas } = await import("./db");
+      return getAllMultas();
+    }),
+    create: protectedProcedure
+      .input(z.object({
+        numeroAuto: z.string().optional(),
+        dataInfracao: z.date().optional(),
+        horaInfracao: z.string().optional(),
+        localInfracao: z.string().optional(),
+        codigoInfracao: z.string().optional(),
+        descricaoInfracao: z.string().optional(),
+        valor: z.number().optional(),
+        pontos: z.number().optional(),
+        veiculoPlaca: z.string().optional(),
+        motoristaId: z.number().optional(),
+        dataVencimento: z.date().optional(),
+        status: z.enum(["Pendente", "Pago", "Recorrido", "Cancelado"]).optional(),
+        pdfUrl: z.string().optional(),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createMulta } = await import("./db");
+        const id = await createMulta(input);
+        return { id };
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        numeroAuto: z.string().optional(),
+        dataInfracao: z.date().optional(),
+        horaInfracao: z.string().optional(),
+        localInfracao: z.string().optional(),
+        codigoInfracao: z.string().optional(),
+        descricaoInfracao: z.string().optional(),
+        valor: z.number().optional(),
+        pontos: z.number().optional(),
+        veiculoPlaca: z.string().optional(),
+        motoristaId: z.number().optional(),
+        dataVencimento: z.date().optional(),
+        status: z.enum(["Pendente", "Pago", "Recorrido", "Cancelado"]).optional(),
+        pdfUrl: z.string().optional(),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const { updateMulta } = await import("./db");
+        await updateMulta(id, data);
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteMulta } = await import("./db");
+        await deleteMulta(input.id);
         return { success: true };
       }),
   }),

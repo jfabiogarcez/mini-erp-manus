@@ -236,3 +236,29 @@
 - [ ] Testar calendário visual e sincronização
 - [ ] Testar upload de PDFs de multas e extração de dados
 - [ ] Criar checkpoint final
+
+## Implementação das 3 Sugestões
+
+### 1. Upload de Excel para Cadastro em Massa
+- [ ] Criar endpoint tRPC para processar Excel de membros da equipe
+- [ ] Implementar leitura e validação de planilha Excel
+- [ ] Adicionar lógica de cadastro em massa com tratamento de erros
+- [ ] Atualizar interface da página de Equipe com funcionalidade completa
+
+### 2. Módulo de Multas Completo
+- [x] Criar funções de database para Multas
+- [ ] Implementar endpoint para upload de PDFs
+- [ ] Criar extração automática de dados de PDF usando IA
+- [ ] Implementar upload em lote de múltiplos PDFs
+- [x] Criar página de Multas com listagem e formulários
+- [x] Adicionar vinculação com motoristas e veículos
+- [x] Adicionar item "Multas" no menu lateral
+
+### 3. Calendário Visual Interativo
+- [ ] Instalar biblioteca FullCalendar
+- [ ] Criar componente de calendário com visualizações (mensal/semanal/diária)
+- [ ] Implementar eventos coloridos por urgência
+- [ ] Adicionar drag-and-drop para reagendar
+- [ ] Sincronizar com missões, tarefas e multas
+- [ ] Adicionar botão "Adicionar ao Calendário" em todas as entidades
+- [ ] Implementar alertas visuais e por e-mail

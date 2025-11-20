@@ -234,6 +234,10 @@ export default function Dashboard() {
             <Mail className="h-5 w-5" />
             E-mail
           </a>
+          <Link href="/multas" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+            <AlertCircle className="h-5 w-5" />
+            Multas
+          </Link>
           <div className="space-y-1">
             <Link href="/equipe" className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
               <div className="flex items-center gap-3">

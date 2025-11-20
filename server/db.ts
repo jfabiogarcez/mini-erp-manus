@@ -381,3 +381,48 @@ export async function deleteMembroEquipe(id: number) {
   // Soft delete
   await db.update(membrosEquipe).set({ ativo: 0 }).where(eq(membrosEquipe.id, id));
 }
+
+
+// ===== Multas =====
+
+export async function getAllMultas() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { multas } = await import("../drizzle/schema");
+  return db.select().from(multas).orderBy(multas.createdAt);
+}
+
+export async function getMultaById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const { multas } = await import("../drizzle/schema");
+  const result = await db.select().from(multas).where(eq(multas.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createMulta(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { multas } = await import("../drizzle/schema");
+  const result = await db.insert(multas).values(data);
+  return Number((result as any).insertId || 0);
+}
+
+export async function updateMulta(id: number, data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { multas } = await import("../drizzle/schema");
+  await db.update(multas).set(data).where(eq(multas.id, id));
+}
+
+export async function deleteMulta(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { multas } = await import("../drizzle/schema");
+  await db.delete(multas).where(eq(multas.id, id));
+}
