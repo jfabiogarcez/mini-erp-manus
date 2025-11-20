@@ -35,6 +35,9 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Webhook para integração com Manus
+  const webhookRouter = await import("../webhook");
+  app.use("/api/webhook", webhookRouter.default);
   // tRPC API
   app.use(
     "/api/trpc",

@@ -1,8 +1,8 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
-import { Streamdown } from 'streamdown';
+import { Link } from "wouter";
 
 /**
  * All content in this page are only for example, replace with your own feature implementation
@@ -19,14 +19,21 @@ export default function Home() {
   // Use APP_LOGO (as image src) and APP_TITLE if needed
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <main className="text-center space-y-8 p-8">
+        <div className="space-y-4">
+          <h1 className="text-5xl font-bold text-gray-900">{APP_TITLE}</h1>
+          <p className="text-xl text-gray-600">Sistema de ERP simplificado com automação via e-mail e WhatsApp</p>
+        </div>
+        <div className="space-y-4">
+          <p className="text-gray-700">Consolide seus dados de planilhas, agende tarefas e gerencie seu negócio em um único lugar.</p>
+          <Link href="/dashboard">
+            <Button size="lg" className="gap-2">
+              Acessar Dashboard
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
       </main>
     </div>
   );

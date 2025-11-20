@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, InsertRegistro, InsertTarefa } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,88 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// === Registros Queries ===
+
+export async function getAllRegistros() {
+  const db = await getDb();
+  if (!db) return [];
+  const { registros } = await import("../drizzle/schema");
+  return db.select().from(registros).orderBy(registros.createdAt);
+}
+
+export async function getRegistroById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const { registros } = await import("../drizzle/schema");
+  const result = await db.select().from(registros).where(eq(registros.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createRegistro(data: InsertRegistro) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { registros } = await import("../drizzle/schema");
+  const result = await db.insert(registros).values(data);
+  return Number(result[0].insertId);
+}
+
+export async function updateRegistro(id: number, data: Partial<InsertRegistro>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { registros } = await import("../drizzle/schema");
+  await db.update(registros).set(data).where(eq(registros.id, id));
+}
+
+export async function deleteRegistro(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { registros } = await import("../drizzle/schema");
+  await db.delete(registros).where(eq(registros.id, id));
+}
+
+export async function getRegistroByChaveAgrupamento(chave: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const { registros } = await import("../drizzle/schema");
+  const result = await db.select().from(registros).where(eq(registros.chaveAgrupamento, chave)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// === Tarefas Queries ===
+
+export async function getAllTarefas() {
+  const db = await getDb();
+  if (!db) return [];
+  const { tarefas } = await import("../drizzle/schema");
+  return db.select().from(tarefas).orderBy(tarefas.dataVencimento);
+}
+
+export async function getTarefaById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const { tarefas } = await import("../drizzle/schema");
+  const result = await db.select().from(tarefas).where(eq(tarefas.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createTarefa(data: InsertTarefa) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { tarefas } = await import("../drizzle/schema");
+  const result = await db.insert(tarefas).values(data);
+  return Number(result[0].insertId);
+}
+
+export async function updateTarefa(id: number, data: Partial<InsertTarefa>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { tarefas } = await import("../drizzle/schema");
+  await db.update(tarefas).set(data).where(eq(tarefas.id, id));
+}
+
+export async function deleteTarefa(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { tarefas } = await import("../drizzle/schema");
+  await db.delete(tarefas).where(eq(tarefas.id, id));
+}
