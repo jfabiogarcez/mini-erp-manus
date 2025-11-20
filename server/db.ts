@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, gte, lte, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, InsertRegistro, InsertTarefa } from "../drizzle/schema";
+import { InsertUser, users, InsertMembroEquipe, InsertRegistro, InsertTarefa } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -182,7 +182,6 @@ export async function getArquivosByMissaoId(missaoId: number) {
 // ========== EVENTOS DO CALENDÁRIO ==========
 
 import { eventos, InsertEvento } from "../drizzle/schema";
-import { and, gte, lte } from "drizzle-orm";
 
 export async function createEvento(evento: InsertEvento): Promise<number> {
   const db = await getDb();
@@ -337,4 +336,48 @@ export async function deleteTarefa(id: number) {
   if (!db) throw new Error("Database not available");
   const { tarefas } = await import("../drizzle/schema");
   await db.delete(tarefas).where(eq(tarefas.id, id));
+}
+
+// ========== MEMBROS DA EQUIPE ==========
+
+export async function getAllMembrosEquipe() {
+  const db = await getDb();
+  if (!db) return [];
+  const { membrosEquipe } = await import("../drizzle/schema");
+  return db.select().from(membrosEquipe).where(eq(membrosEquipe.ativo, 1));
+}
+
+export async function getMembrosByTipo(tipo: "Motorista" | "Segurança" | "Receptivo") {
+  const db = await getDb();
+  if (!db) return [];
+  const { membrosEquipe } = await import("../drizzle/schema");
+  return db.select().from(membrosEquipe).where(
+    and(
+      eq(membrosEquipe.tipo, tipo),
+      eq(membrosEquipe.ativo, 1)
+    )
+  );
+}
+
+export async function createMembroEquipe(membro: InsertMembroEquipe) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { membrosEquipe } = await import("../drizzle/schema");
+  const result = await db.insert(membrosEquipe).values(membro);
+  return Number(result[0].insertId);
+}
+
+export async function updateMembroEquipe(id: number, membro: Partial<InsertMembroEquipe>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { membrosEquipe } = await import("../drizzle/schema");
+  await db.update(membrosEquipe).set(membro).where(eq(membrosEquipe.id, id));
+}
+
+export async function deleteMembroEquipe(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { membrosEquipe } = await import("../drizzle/schema");
+  // Soft delete
+  await db.update(membrosEquipe).set({ ativo: 0 }).where(eq(membrosEquipe.id, id));
 }

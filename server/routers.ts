@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -213,6 +213,67 @@ export const appRouter = router({
       await deleteTarefa(input.id);
       return { success: true };
     }),
+  }),
+  equipe: router({
+    listAll: protectedProcedure.query(async () => {
+      const { getAllMembrosEquipe } = await import("./db");
+      return getAllMembrosEquipe();
+    }),
+    listByTipo: protectedProcedure
+      .input(z.enum(["Motorista", "Segurança", "Receptivo"]))
+      .query(async ({ input }) => {
+        const { getMembrosByTipo } = await import("./db");
+        return getMembrosByTipo(input);
+      }),
+    create: protectedProcedure
+      .input(z.object({
+        nome: z.string(),
+        fotoUrl: z.string().optional(),
+        email: z.string().email().optional(),
+        telefone: z.string().optional(),
+        whatsapp: z.string().optional(),
+        cpf: z.string().optional(),
+        tipo: z.enum(["Motorista", "Segurança", "Receptivo"]),
+        dadosBancarios: z.string().optional(),
+        chavePix: z.string().optional(),
+        endereco: z.string().optional(),
+        documentos: z.string().optional(),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createMembroEquipe } = await import("./db");
+        const id = await createMembroEquipe(input);
+        return { id, success: true };
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string().optional(),
+        fotoUrl: z.string().optional(),
+        email: z.string().email().optional(),
+        telefone: z.string().optional(),
+        whatsapp: z.string().optional(),
+        cpf: z.string().optional(),
+        tipo: z.enum(["Motorista", "Segurança", "Receptivo"]).optional(),
+        dadosBancarios: z.string().optional(),
+        chavePix: z.string().optional(),
+        endereco: z.string().optional(),
+        documentos: z.string().optional(),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const { updateMembroEquipe } = await import("./db");
+        await updateMembroEquipe(id, data);
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteMembroEquipe } = await import("./db");
+        await deleteMembroEquipe(input.id);
+        return { success: true };
+      }),
   }),
 });
 

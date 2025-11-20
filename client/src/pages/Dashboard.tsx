@@ -23,7 +23,11 @@ import {
   Clock,
   AlertCircle,
   Search,
-  Filter
+  Filter,
+  MessageCircle,
+  Mail,
+  Users,
+  ChevronDown
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -221,6 +225,34 @@ export default function Dashboard() {
             <Bell className="h-5 w-5" />
             Tarefas
           </a>
+          <a href="#whatsapp" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+            <MessageCircle className="h-5 w-5" />
+            WhatsApp
+          </a>
+          <a href="#email" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+            <Mail className="h-5 w-5" />
+            E-mail
+          </a>
+          <div className="space-y-1">
+            <button className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+              <div className="flex items-center gap-3">
+                <Users className="h-5 w-5" />
+                Equipe
+              </div>
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            <div className="ml-8 space-y-1">
+              <a href="#motoristas" className="block px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded">
+                Motoristas
+              </a>
+              <a href="#seguranca" className="block px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded">
+                Segurança
+              </a>
+              <a href="#receptivo" className="block px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded">
+                Receptivo
+              </a>
+            </div>
+          </div>
         </nav>
       </aside>
 

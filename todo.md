@@ -162,3 +162,33 @@
 - [ ] Testar modo automático
 - [ ] Validar reversão de ações
 - [ ] Criar checkpoint final
+
+## Módulos de WhatsApp, E-mail e Equipe
+
+### Fase 1: Banco de Dados
+- [x] Criar tabela `membros_equipe` (id, nome, foto_url, email, telefone, cpf, tipo, dados_bancarios, chave_pix, endereco, documentos, ativo, created_at, updated_at)
+- [ ] Criar tabela `mensagens_whatsapp` (id, numero_origem, mensagem, anexos, data_recebimento, processado)
+- [ ] Criar tabela `emails_recebidos` (id, remetente, assunto, corpo, anexos, data_recebimento, processado)
+
+### Fase 2: Backend
+- [x] Implementar CRUD de membros da equipe
+- [ ] Implementar upload de fotos e documentos
+- [ ] Criar endpoints para WhatsApp e E-mail
+- [x] Implementar filtros por tipo de membro (Motorista, Segurança, Receptivo)
+
+### Fase 3: Interface de Equipe
+- [ ] Criar página de listagem de membros da equipe
+- [ ] Criar formulário de cadastro completo de membros
+- [ ] Implementar upload de foto e documentos
+- [ ] Adicionar filtros por tipo (Motorista, Segurança, Receptivo)
+
+### Fase 4: Módulos de Comunicação
+- [x] Adicionar item "WhatsApp" no menu lateral
+- [x] Adicionar item "E-mail" no menu lateral
+- [x] Adicionar item "Equipe" no menu lateral com submenus
+- [ ] Criar páginas de WhatsApp e E-mail
+
+### Fase 5: Testes e Checkpoint
+- [ ] Testar cadastro de membros
+- [ ] Testar upload de arquivos
+- [ ] Criar checkpoint final

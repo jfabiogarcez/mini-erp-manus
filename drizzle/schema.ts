@@ -132,6 +132,34 @@ export type PadraoAprendido = typeof padroesAprendidos.$inferSelect;
 export type InsertPadraoAprendido = typeof padroesAprendidos.$inferInsert;
 
 /**
+ * Tabela de membros da equipe (Motoristas, Segurança, Receptivo)
+ */
+export const membrosEquipe = mysqlTable("membrosEquipe", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  fotoUrl: text("fotoUrl"), // URL da foto no S3
+  email: varchar("email", { length: 320 }),
+  telefone: varchar("telefone", { length: 20 }),
+  whatsapp: varchar("whatsapp", { length: 20 }),
+  cpf: varchar("cpf", { length: 14 }),
+  tipo: mysqlEnum("tipo", ["Motorista", "Segurança", "Receptivo"]).notNull(),
+  // Dados bancários (JSON)
+  dadosBancarios: text("dadosBancarios"), // { banco, agencia, conta, tipo_conta }
+  chavePix: varchar("chavePix", { length: 255 }),
+  // Endereço (JSON)
+  endereco: text("endereco"), // { rua, numero, complemento, bairro, cidade, estado, cep }
+  // Documentos (JSON)
+  documentos: text("documentos"), // { rg, cnh, cnh_url, outros_docs }
+  ativo: int("ativo").default(1).notNull(), // Boolean (0 = inativo, 1 = ativo)
+  observacoes: text("observacoes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MembroEquipe = typeof membrosEquipe.$inferSelect;
+export type InsertMembroEquipe = typeof membrosEquipe.$inferInsert;
+
+/**
  * Tabela de registros consolidados do mini-ERP.
  * Armazena dados extraídos de planilhas enviadas por e-mail/WhatsApp.
  */
