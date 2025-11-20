@@ -19,14 +19,14 @@ export default function Home() {
   // Use APP_LOGO (as image src) and APP_TITLE if needed
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen flex flex-col items-center justify-center" style={{backgroundColor: '#0433ff'}}>
       <main className="text-center space-y-8 p-8">
         <div className="space-y-4">
-          <h1 className="text-5xl font-bold text-gray-900">{APP_TITLE}</h1>
-          <p className="text-xl text-gray-600">Sistema de ERP simplificado com automação via e-mail e WhatsApp</p>
+          <h1 className="text-5xl font-bold text-white">{APP_TITLE}</h1>
+          <p className="text-xl text-gray-200">Sistema de ERP simplificado</p>
         </div>
         <div className="space-y-4">
-          <p className="text-gray-700">Consolide seus dados de planilhas, agende tarefas e gerencie seu negócio em um único lugar.</p>
+          <p className="text-white font-semibold text-2xl">CONSOLIDADO</p>
           <Link href="/dashboard">
             <Button size="lg" className="gap-2">
               Acessar Dashboard

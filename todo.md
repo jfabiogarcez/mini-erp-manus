@@ -57,3 +57,75 @@
 - [x] Adicionar filtros visuais por categoria e status
 - [x] Criar visualização dedicada para tarefas com indicadores de urgência
 - [x] Garantir design responsivo para dispositivos móveis
+
+## Sistema de Gestão de Missões com WhatsApp
+
+### Fase 1: Banco de Dados e Códigos de Missão
+- [x] Criar tabela `missoes` com código único, cliente, status, data
+- [x] Criar tabela `arquivos_missao` para armazenar arquivos vinculados
+- [x] Implementar gerador automático de códigos de missão (MISS-YYYY-NNN)
+- [x] Criar CRUD de missões no backend
+
+### Fase 2: Processador de Arquivos
+- [x] Implementar parser de arquivos Excel
+- [x] Implementar extração de texto de arquivos Word
+- [x] Implementar processamento e armazenamento de imagens
+- [x] Criar sistema de vinculação de arquivos à missão via código
+
+### Fase 3: Gerador de Relatórios
+- [ ] Criar gerador de planilha Excel consolidada
+- [ ] Implementar gerador de relatório PDF com imagens
+- [ ] Adicionar formatação profissional aos relatórios
+- [ ] Criar sistema de download de relatórios compilados
+
+### Fase 4: Gerador de Relatórios
+- [ ] Criar gerador de planilha Excel consolidada
+- [ ] Implementar gerador de relatório PDF com imagens
+- [ ] Adicionar formatação profissional aos relatórios
+
+### Fase 5: Webhook e Automação
+- [ ] Criar webhook para receber dados do WhatsApp
+- [ ] Implementar identificação automática de código de missão
+- [ ] Criar sistema de resposta automática ao cliente
+- [ ] Implementar envio de relatório compilado via WhatsApp
+
+### Fase 6: Testes e Documentação
+- [ ] Testar fluxo completo de ponta a ponta
+- [ ] Criar documentação de uso para motoristas
+- [ ] Criar checkpoint final
+
+## Sistema de Calendário Integrado
+
+### Fase 1: Banco de Dados de Eventos
+- [ ] Criar tabela `eventos` com título, data, tipo, cor, missãoId, tarefaId
+- [ ] Implementar CRUD de eventos no backend
+- [ ] Criar sistema de categorização por cores
+
+### Fase 2: Componente de Calendário
+- [ ] Instalar e configurar FullCalendar
+- [ ] Criar componente de calendário interativo
+- [ ] Implementar visualizações (mensal, semanal, diária)
+- [ ] Adicionar drag-and-drop para reagendar eventos
+
+### Fase 3: Sistema de Alertas
+- [ ] Criar lógica de alertas por cor (vermelho, amarelo, verde, azul)
+- [ ] Implementar notificações por e-mail automáticas
+- [ ] Criar badge de contador de eventos urgentes
+- [ ] Implementar resumo diário por e-mail
+
+### Fase 4: Integração Google Calendar
+- [ ] Configurar Google Calendar API
+- [ ] Implementar importação de eventos do Google Calendar
+- [ ] Implementar exportação para Google Calendar
+- [ ] Criar exportação em formato .ics
+
+### Fase 5: Botões de Calendário
+- [ ] Adicionar botão "Adicionar ao Calendário" em missões
+- [ ] Adicionar botão "Adicionar ao Calendário" em tarefas
+- [ ] Adicionar botão "Adicionar ao Calendário" em registros
+- [ ] Criar sincronização automática ao criar novos itens
+
+### Fase 6: Webhook e Testes
+- [ ] Finalizar webhook do WhatsApp para processar arquivos
+- [ ] Testar fluxo completo de ponta a ponta
+- [ ] Criar documentação de uso

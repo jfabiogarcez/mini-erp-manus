@@ -87,6 +87,61 @@ export const appRouter = router({
         return verificarTarefasProximasVencimento(input.diasAntecedencia);
       }),
   }),
+  missoes: router({
+    list: publicProcedure.query(async () => {
+      const { getAllMissoes } = await import("./db");
+      return getAllMissoes();
+    }),
+    getById: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      const { getMissaoById } = await import("./db");
+      return getMissaoById(input.id);
+    }),
+    getByCodigo: publicProcedure.input(z.object({ codigoMissao: z.string() })).query(async ({ input }) => {
+      const { getMissaoByCodigo } = await import("./db");
+      return getMissaoByCodigo(input.codigoMissao);
+    }),
+    create: publicProcedure
+      .input(
+        z.object({
+          cliente: z.string().optional(),
+          motorista: z.string().optional(),
+          dataInicio: z.date().optional(),
+          observacoes: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { createMissao, getMissaoById } = await import("./db");
+        const id = await createMissao(input);
+        return await getMissaoById(id);
+      }),
+    update: publicProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          cliente: z.string().optional(),
+          motorista: z.string().optional(),
+          status: z.enum(["Pendente", "Em Andamento", "Concluída", "Cancelada"]).optional(),
+          dataFim: z.date().optional(),
+          observacoes: z.string().optional(),
+          linkGoogleDrive: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { updateMissao } = await import("./db");
+        const { id, ...data } = input;
+        await updateMissao(id, data);
+        return { success: true };
+      }),
+    delete: publicProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      const { deleteMissao } = await import("./db");
+      await deleteMissao(input.id);
+      return { success: true };
+    }),
+    getArquivos: publicProcedure.input(z.object({ missaoId: z.number() })).query(async ({ input }) => {
+      const { getArquivosByMissaoId } = await import("./db");
+      return getArquivosByMissaoId(input.missaoId);
+    }),
+  }),
   tarefas: router({
     list: publicProcedure.query(async () => {
       const { getAllTarefas } = await import("./db");

@@ -21,9 +21,68 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
-
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+/**
+ * Tabela de missões para rastreamento de operações
+ */
+export const missoes = mysqlTable("missoes", {
+  id: int("id").autoincrement().primaryKey(),
+  codigoMissao: varchar("codigoMissao", { length: 50 }).notNull().unique(),
+  cliente: text("cliente"),
+  motorista: text("motorista"),
+  status: mysqlEnum("status", ["Pendente", "Em Andamento", "Concluída", "Cancelada"]).default("Pendente").notNull(),
+  dataInicio: timestamp("dataInicio"),
+  dataFim: timestamp("dataFim"),
+  observacoes: text("observacoes"),
+  linkGoogleDrive: text("linkGoogleDrive"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Missao = typeof missoes.$inferSelect;
+export type InsertMissao = typeof missoes.$inferInsert;
+
+/**
+ * Tabela de arquivos vinculados a missões
+ */
+export const arquivosMissao = mysqlTable("arquivosMissao", {
+  id: int("id").autoincrement().primaryKey(),
+  missaoId: int("missaoId").notNull(),
+  tipoArquivo: mysqlEnum("tipoArquivo", ["Excel", "Word", "Imagem", "PDF", "Outro"]).notNull(),
+  nomeArquivo: text("nomeArquivo").notNull(),
+  urlArquivo: text("urlArquivo").notNull(),
+  tamanhoBytes: int("tamanhoBytes"),
+  metadados: text("metadados"), // JSON string com informações extras
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ArquivoMissao = typeof arquivosMissao.$inferSelect;
+export type InsertArquivoMissao = typeof arquivosMissao.$inferInsert;
+
+/**
+ * Tabela de eventos do calendário
+ */
+export const eventos = mysqlTable("eventos", {
+  id: int("id").autoincrement().primaryKey(),
+  titulo: text("titulo").notNull(),
+  descricao: text("descricao"),
+  dataInicio: timestamp("dataInicio").notNull(),
+  dataFim: timestamp("dataFim"),
+  tipo: mysqlEnum("tipo", ["Missão", "Tarefa", "Registro", "Outro"]).notNull(),
+  cor: varchar("cor", { length: 7 }).default("#0433ff").notNull(), // Hex color
+  missaoId: int("missaoId"),
+  tarefaId: int("tarefaId"),
+  registroId: int("registroId"),
+  googleCalendarEventId: text("googleCalendarEventId"), // ID do evento no Google Calendar
+  alertaEnviado: int("alertaEnviado").default(0).notNull(), // Boolean (0 ou 1)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Evento = typeof eventos.$inferSelect;
+export type InsertEvento = typeof eventos.$inferInsert;
 
 /**
  * Tabela de registros consolidados do mini-ERP.

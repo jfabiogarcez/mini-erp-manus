@@ -15,6 +15,20 @@
       "when": 1763648189088,
       "tag": "0001_simple_boom_boom",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1763649698655,
+      "tag": "0002_rare_millenium_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1763650040051,
+      "tag": "0003_luxuriant_nextwave",
+      "breakpoints": true
     }
   ]
 }

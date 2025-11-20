@@ -76,7 +76,6 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     throw error;
   }
 }
-
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) {
@@ -89,7 +88,172 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// === Registros Queries ===
+// ========== MISSÕES ==========
+
+import { missoes, arquivosMissao, InsertMissao, InsertArquivoMissao } from "../drizzle/schema";
+import { desc } from "drizzle-orm";
+
+/**
+ * Gera um código único de missão no formato MISS-YYYY-NNN
+ */
+export async function gerarCodigoMissao(): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const ano = new Date().getFullYear();
+  const prefixo = `MISS-${ano}-`;
+
+  // Buscar a última missão do ano
+  const ultimaMissao = await db
+    .select()
+    .from(missoes)
+    .where(eq(missoes.codigoMissao, prefixo))
+    .orderBy(desc(missoes.id))
+    .limit(1);
+
+  let numero = 1;
+  if (ultimaMissao.length > 0) {
+    const ultimoCodigo = ultimaMissao[0]!.codigoMissao;
+    const match = ultimoCodigo.match(/-([0-9]+)$/);
+    if (match) {
+      numero = parseInt(match[1]!) + 1;
+    }
+  }
+
+  return `${prefixo}${numero.toString().padStart(3, "0")}`;
+}
+
+export async function createMissao(missao: Omit<InsertMissao, "codigoMissao">): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const codigoMissao = await gerarCodigoMissao();
+  const result = await db.insert(missoes).values({ ...missao, codigoMissao });
+  return Number((result as any).insertId);
+}
+
+export async function getAllMissoes() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(missoes).orderBy(desc(missoes.createdAt));
+}
+
+export async function getMissaoById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(missoes).where(eq(missoes.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getMissaoByCodigo(codigoMissao: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(missoes).where(eq(missoes.codigoMissao, codigoMissao)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateMissao(id: number, missao: Partial<InsertMissao>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(missoes).set(missao).where(eq(missoes.id, id));
+}
+
+export async function deleteMissao(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(missoes).where(eq(missoes.id, id));
+}
+
+// ========== ARQUIVOS DE MISSÃO ==========
+
+export async function createArquivoMissao(arquivo: InsertArquivoMissao): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(arquivosMissao).values(arquivo);
+  return Number((result as any).insertId);
+}
+
+export async function getArquivosByMissaoId(missaoId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(arquivosMissao).where(eq(arquivosMissao.missaoId, missaoId));
+}
+
+// ========== EVENTOS DO CALENDÁRIO ==========
+
+import { eventos, InsertEvento } from "../drizzle/schema";
+import { and, gte, lte } from "drizzle-orm";
+
+export async function createEvento(evento: InsertEvento): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(eventos).values(evento);
+  return Number((result as any).insertId);
+}
+
+export async function getAllEventos() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventos).orderBy(eventos.dataInicio);
+}
+
+export async function getEventoById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(eventos).where(eq(eventos.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getEventosByPeriodo(dataInicio: Date, dataFim: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventos).where(
+    and(
+      gte(eventos.dataInicio, dataInicio),
+      lte(eventos.dataInicio, dataFim)
+    )
+  );
+}
+
+export async function getEventosByMissaoId(missaoId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventos).where(eq(eventos.missaoId, missaoId));
+}
+
+export async function updateEvento(id: number, evento: Partial<InsertEvento>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(eventos).set(evento).where(eq(eventos.id, id));
+}
+
+export async function deleteEvento(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(eventos).where(eq(eventos.id, id));
+}
+
+/**
+ * Retorna eventos urgentes (próximos 3 dias) que ainda não tiveram alerta enviado
+ */
+export async function getEventosUrgentes() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const hoje = new Date();
+  const dataLimite = new Date();
+  dataLimite.setDate(dataLimite.getDate() + 3);
+  
+  return db.select().from(eventos).where(
+    and(
+      gte(eventos.dataInicio, hoje),
+      lte(eventos.dataInicio, dataLimite),
+      eq(eventos.alertaEnviado, 0)
+    )
+  );
+}
+
+// ========== REGISTROS ==========
 
 export async function getAllRegistros() {
   const db = await getDb();
