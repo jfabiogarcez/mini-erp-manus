@@ -23,7 +23,7 @@ export default function Home() {
       <main className="text-center space-y-8 p-8">
         <div className="space-y-4">
           <h1 className="text-5xl font-bold text-white">{APP_TITLE}</h1>
-          <p className="text-xl text-gray-200">Sistema de ERP simplificado</p>
+          <p className="text-xl text-gray-200">Sistema de Gerenciamento</p>
         </div>
         <div className="space-y-4">
           <p className="text-white font-semibold text-2xl">CONSOLIDADO</p>
