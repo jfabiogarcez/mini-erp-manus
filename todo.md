@@ -635,3 +635,39 @@
 - [x] Testar atualização de status
 - [x] Testar com múltiplas abas
 - [x] Criar checkpoint final
+
+
+## Debug e Redesign do WhatsApp
+
+### Fase 1: Debug Twilio
+- [x] Verificar se webhook está recebendo mensagens do Twilio
+- [x] Validar assinatura do Twilio
+- [x] Verificar logs de erro
+- [x] Testar com número real do Twilio
+- [x] Sincronizar mensagens recebidas com banco de dados
+
+### Fase 2: Novo Layout de Conversa
+- [x] Criar componente ChatWindow para exibir conversa
+- [x] Implementar layout tipo WhatsApp (mensagens lado a lado)
+- [x] Adicionar avatares e nomes de remetentes
+- [x] Implementar timestamps de mensagens
+- [x] Adicionar indicador de digitação
+
+### Fase 3: Chat Interface
+- [x] Criar input de mensagem na parte inferior
+- [x] Implementar envio de mensagens
+- [x] Adicionar indicador de status (enviado, entregue, lido)
+- [x] Scroll automático para última mensagem
+- [x] Suportar emojis e formatação
+
+### Fase 4: Integração WebSocket
+- [x] Atualizar chat em tempo real
+- [x] Sincronizar com WebSocket
+- [x] Animar novas mensagens
+- [x] Atualizar status de entrega
+
+### Fase 5: Testes
+- [x] Testar com mensagens reais do Twilio
+- [x] Testar layout responsivo
+- [x] Testar WebSocket em tempo real
+- [x] Criar checkpoint final
