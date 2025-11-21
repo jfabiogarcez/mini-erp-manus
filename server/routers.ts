@@ -776,6 +776,18 @@ Retorne em formato markdown.
       const { getAllRelatorios } = await import("./db");
       return getAllRelatorios();
     }),
+    agregarMissoes: protectedProcedure
+      .input(z.object({ mes: z.number().min(1).max(12), ano: z.number() }))
+      .query(async ({ input }) => {
+        const { agregarDadosMissoesMensal } = await import("./db");
+        return agregarDadosMissoesMensal(input.mes, input.ano);
+      }),
+    agregarMultas: protectedProcedure
+      .input(z.object({ mes: z.number().min(1).max(12), ano: z.number() }))
+      .query(async ({ input }) => {
+        const { agregarDadosMultasMensal } = await import("./db");
+        return agregarDadosMultasMensal(input.mes, input.ano);
+      }),
     getByTipo: protectedProcedure
       .input(z.object({ tipo: z.enum(["Missões", "Multas", "Consolidado"]) }))
       .query(async ({ input }) => {

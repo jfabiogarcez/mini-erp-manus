@@ -446,3 +446,25 @@
 - [x] Adicionar busca por texto
 - [ ] Implementar paginação
 - [ ] Adicionar exportação para Excel
+
+### 17. Integração Real de Notificações
+- [x] Configurar serviço de envio de e-mail (SMTP ou API)
+- [x] Implementar função de envio de e-mail real
+- [x] Configurar WhatsApp Business API ou Twilio
+- [x] Implementar função de envio de WhatsApp real
+- [x] Atualizar sistema de notificações para usar envio real
+- [ ] Adicionar configuração de credenciais via secrets
+- [ ] Testar envio de e-mail
+- [ ] Testar envio de WhatsApp
+- [x] Criar logs de envio com sucesso/erro
+
+### 18. Dashboard de Métricas e KPIs
+- [x] Criar página de Dashboard de Métricas
+- [x] Implementar gráfico de receita mensal
+- [x] Implementar gráfico de missões por status
+- [x] Criar ranking de motoristas mais ativos
+- [x] Implementar gráfico de evolução de multas
+- [x] Adicionar KPIs principais (total missões, receita total, taxa de conclusão)
+- [x] Implementar filtros por período (mês, trimestre, ano)
+- [ ] Adicionar exportação de gráficos
+- [ ] Criar visualização de comparação mês a mês

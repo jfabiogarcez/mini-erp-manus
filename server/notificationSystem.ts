@@ -1,6 +1,8 @@
 import { getDb } from "./db";
 import { notificacoes, missoes, multas } from "../drizzle/schema";
 import { and, eq, lte, gte, isNull } from "drizzle-orm";
+import { sendMissaoNotification, sendMultaNotification } from "./emailService";
+import { sendMissaoWhatsApp, sendMultaWhatsApp } from "./whatsappService";
 
 /**
  * Sistema de notificações automáticas
@@ -192,18 +194,62 @@ export async function enviarNotificacoesAgendadas() {
 
     for (const notificacao of notificacoesParaEnviar) {
       try {
-        // TODO: Aqui seria integrado o envio real de email/WhatsApp
-        // Por enquanto, apenas marca como enviada
-        
-        await db
-          .update(notificacoes)
-          .set({
-            status: "Enviada",
-            dataEnvio: new Date(),
-          })
-          .where(eq(notificacoes.id, notificacao.id));
+        let sucesso = false;
 
-        enviadas++;
+        // Buscar dados completos da missão ou multa
+        if (notificacao.tipo === "Missão") {
+          const missaoData = await db
+            .select()
+            .from(missoes)
+            .where(eq(missoes.id, notificacao.referenciaId))
+            .limit(1);
+
+          if (missaoData.length > 0) {
+            const missao = missaoData[0]!;
+            
+            if (notificacao.canal === "Email" || notificacao.canal === "Ambos") {
+              sucesso = await sendMissaoNotification(notificacao.destinatario, missao);
+            }
+            
+            if (notificacao.canal === "WhatsApp" || notificacao.canal === "Ambos") {
+              const whatsappSuccess = await sendMissaoWhatsApp(notificacao.destinatario, missao);
+              sucesso = sucesso || whatsappSuccess;
+            }
+          }
+        } else if (notificacao.tipo === "Multa") {
+          const multaData = await db
+            .select()
+            .from(multas)
+            .where(eq(multas.id, notificacao.referenciaId))
+            .limit(1);
+
+          if (multaData.length > 0) {
+            const multa = multaData[0]!;
+            
+            if (notificacao.canal === "Email" || notificacao.canal === "Ambos") {
+              sucesso = await sendMultaNotification(notificacao.destinatario, multa);
+            }
+            
+            if (notificacao.canal === "WhatsApp" || notificacao.canal === "Ambos") {
+              const whatsappSuccess = await sendMultaWhatsApp(notificacao.destinatario, multa);
+              sucesso = sucesso || whatsappSuccess;
+            }
+          }
+        }
+
+        if (sucesso) {
+          await db
+            .update(notificacoes)
+            .set({
+              status: "Enviada",
+              dataEnvio: new Date(),
+            })
+            .where(eq(notificacoes.id, notificacao.id));
+
+          enviadas++;
+        } else {
+          throw new Error("Failed to send notification");
+        }
       } catch (error) {
         // Marcar como erro
         await db
