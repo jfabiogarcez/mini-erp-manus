@@ -26,7 +26,7 @@ export default function Home() {
           <p className="text-xl text-gray-200">Sistema de Gerenciamento</p>
         </div>
         <div className="space-y-4">
-          <p className="text-white font-semibold text-2xl">CONSOLIDADO</p>
+          <p className="text-white font-semibold text-2xl"></p>
           <Link href="/dashboard">
             <Button size="lg" className="gap-2">
               Acessar Dashboard
