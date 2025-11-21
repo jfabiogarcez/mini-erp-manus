@@ -5,17 +5,12 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-import SyncDashboard from "./pages/SyncDashboard";
-import MicrosoftLogin from "./pages/MicrosoftLogin";
-import { RealtimeNotifications } from "./components/RealtimeNotifications";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-      <Route path={"/sync-dashboard"} component={SyncDashboard} />
-      <Route path={"/microsoft-login"} component={MicrosoftLogin} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -37,7 +32,6 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <RealtimeNotifications />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
