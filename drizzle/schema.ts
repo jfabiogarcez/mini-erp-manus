@@ -397,3 +397,78 @@ export const notificacoes = mysqlTable("notificacoes", {
 
 export type Notificacao = typeof notificacoes.$inferSelect;
 export type InsertNotificacao = typeof notificacoes.$inferInsert;
+
+/**
+ * Tabela de conversas do WhatsApp
+ * Armazena histórico de conversas com clientes
+ */
+export const conversasWhatsapp = mysqlTable("conversasWhatsapp", {
+  id: int("id").autoincrement().primaryKey(),
+  numeroCliente: varchar("numeroCliente", { length: 20 }).notNull(),
+  nomeCliente: varchar("nomeCliente", { length: 255 }),
+  ultimaMensagem: text("ultimaMensagem"),
+  dataUltimaMsg: timestamp("dataUltimaMsg"),
+  statusConversa: mysqlEnum("statusConversa", ["Ativa", "Arquivada", "Bloqueada"]).default("Ativa").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ConversaWhatsapp = typeof conversasWhatsapp.$inferSelect;
+export type InsertConversaWhatsapp = typeof conversasWhatsapp.$inferInsert;
+
+/**
+ * Tabela de mensagens do WhatsApp
+ * Armazena todas as mensagens trocadas com clientes
+ */
+export const mensagensWhatsapp = mysqlTable("mensagensWhatsapp", {
+  id: int("id").autoincrement().primaryKey(),
+  conversaId: int("conversaId").references(() => conversasWhatsapp.id, { onDelete: "cascade" }).notNull(),
+  remetente: mysqlEnum("remetente", ["Cliente", "Sistema"]).notNull(),
+  mensagem: text("mensagem").notNull(),
+  tipo: mysqlEnum("tipo", ["Texto", "Imagem", "Documento", "Áudio", "Vídeo"]).default("Texto").notNull(),
+  anexoUrl: text("anexoUrl"), // URL do arquivo anexado
+  dataEnvio: timestamp("dataEnvio").notNull(),
+  lida: int("lida").default(0).notNull(), // Boolean (0 ou 1)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MensagemWhatsapp = typeof mensagensWhatsapp.$inferSelect;
+export type InsertMensagemWhatsapp = typeof mensagensWhatsapp.$inferInsert;
+
+/**
+ * Tabela de templates de respostas do WhatsApp
+ * Armazena respostas pré-configuradas com variáveis dinâmicas
+ */
+export const templatesWhatsapp = mysqlTable("templatesWhatsapp", {
+  id: int("id").autoincrement().primaryKey(),
+  titulo: varchar("titulo", { length: 255 }).notNull(),
+  conteudo: text("conteudo").notNull(),
+  variaveis: text("variaveis"), // JSON array com variáveis: ["{{nome}}", "{{email}}", "{{telefone}}"]
+  categoria: varchar("categoria", { length: 100 }), // Ex: "Orçamento", "Agendamento", "Suporte"
+  ativo: int("ativo").default(1).notNull(),
+  vezesUsado: int("vezesUsado").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TemplateWhatsapp = typeof templatesWhatsapp.$inferSelect;
+export type InsertTemplateWhatsapp = typeof templatesWhatsapp.$inferInsert;
+
+/**
+ * Tabela de documentos do WhatsApp
+ * Armazena documentos que podem ser consultados pela IA para contexto
+ */
+export const documentosWhatsapp = mysqlTable("documentosWhatsapp", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  urlArquivo: text("urlArquivo").notNull(),
+  tipoArquivo: varchar("tipoArquivo", { length: 100 }), // PDF, DOCX, TXT, etc.
+  tamanhoBytes: int("tamanhoBytes"),
+  descricao: text("descricao"),
+  conteudoExtraido: text("conteudoExtraido"), // Texto extraído do documento para busca
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DocumentoWhatsapp = typeof documentosWhatsapp.$inferSelect;
+export type InsertDocumentoWhatsapp = typeof documentosWhatsapp.$inferInsert;

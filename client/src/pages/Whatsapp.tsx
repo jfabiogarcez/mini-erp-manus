@@ -16,6 +16,7 @@ import {
   BarChart3,
   FileText,
   Loader2,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,578 +39,645 @@ export default function Whatsapp() {
   const [activeTab, setActiveTab] = useState("conversas");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<number | null>(null);
+  const [editingDocumento, setEditingDocumento] = useState<number | null>(null);
   const [templateForm, setTemplateForm] = useState({
     titulo: "",
     conteudo: "",
+    variaveis: "",
     categoria: "geral",
   });
+  const [documentoForm, setDocumentoForm] = useState({
+    nome: "",
+    descricao: "",
+  });
+  const [uploadingFile, setUploadingFile] = useState(false);
 
-  // Mock data - será substituído por chamadas tRPC
-  const conversas = [
-    {
-      id: 1,
-      cliente: "João Silva",
-      telefone: "+55 11 97263-2473",
-      ultimaMensagem: "Qual o valor do transporte?",
-      horario: "14:30",
-      status: "ativo",
-      mensagensNao: 2,
-    },
-    {
-      id: 2,
-      cliente: "Maria Santos",
-      telefone: "+55 11 98765-4321",
-      ultimaMensagem: "Obrigado pelo serviço!",
-      horario: "10:15",
-      status: "encerrado",
-      mensagensNao: 0,
-    },
-    {
-      id: 3,
-      cliente: "Carlos Oliveira",
-      telefone: "+55 11 99876-5432",
-      ultimaMensagem: "Preciso de um orçamento urgente",
-      horario: "09:45",
-      status: "ativo",
-      mensagensNao: 1,
-    },
-  ];
+  // ========== CONVERSAS ==========
+  const { data: conversas = [], isLoading: loadingConversas, refetch: refetchConversas } = 
+    trpc.whatsapp.conversas.list.useQuery();
 
-  const templates = [
-    {
-      id: 1,
-      titulo: "Saudação Inicial",
-      categoria: "geral",
-      conteudo: "Olá! 👋 Bem-vindo à Transblindados! Como posso ajudá-lo?",
+  const deleteConversaMutation = trpc.whatsapp.conversas.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Conversa deletada com sucesso!");
+      refetchConversas();
     },
-    {
-      id: 2,
-      titulo: "Informações de Serviços",
-      categoria: "servicos",
-      conteudo: "Nossos principais serviços:\n1️⃣ Transporte Executivo\n2️⃣ Segurança Pessoal\n3️⃣ Receptivo de Aeroporto",
+    onError: () => {
+      toast.error("Erro ao deletar conversa");
     },
-    {
-      id: 3,
-      titulo: "Solicitação de Orçamento",
-      categoria: "orcamento",
-      conteudo: "Para gerar seu orçamento, preciso de:\n- Serviço desejado\n- Data e horário\n- Origem e destino",
-    },
-    {
-      id: 4,
-      titulo: "Confirmação de Agendamento",
-      categoria: "agendamento",
-      conteudo: "✅ Sua missão foi agendada com sucesso!\n\nCódigo: {{codigo}}\nData: {{data}}\nHorário: {{horario}}\n\nSeu motorista entrará em contato em breve!",
-    },
-  ];
+  });
 
-  const documentos = [
-    {
-      id: 1,
-      nome: "Tabela de Preços - Transblindados.pdf",
-      tipo: "PDF",
-      tamanho: "245 KB",
-      dataUpload: "20/11/2025",
-      categoria: "precos",
-    },
-    {
-      id: 2,
-      nome: "Modelo de Contrato.docx",
-      tipo: "DOCX",
-      tamanho: "156 KB",
-      dataUpload: "19/11/2025",
-      categoria: "contratos",
-    },
-    {
-      id: 3,
-      nome: "Políticas de Cancelamento.pdf",
-      tipo: "PDF",
-      tamanho: "89 KB",
-      dataUpload: "18/11/2025",
-      categoria: "politicas",
-    },
-    {
-      id: 4,
-      nome: "FAQ - Perguntas Frequentes.txt",
-      tipo: "TXT",
-      tamanho: "34 KB",
-      dataUpload: "17/11/2025",
-      categoria: "faq",
-    },
-  ];
+  // ========== MENSAGENS ==========
+  const { data: allMensagens = [], refetch: refetchMensagens } = 
+    trpc.whatsapp.mensagens.list.useQuery();
 
-  const handleTemplateSubmit = () => {
+  // ========== TEMPLATES ==========
+  const { data: templates = [], isLoading: loadingTemplates, refetch: refetchTemplates } = 
+    trpc.whatsapp.templates.list.useQuery();
+
+  const createTemplateMutation = trpc.whatsapp.templates.create.useMutation({
+    onSuccess: () => {
+      toast.success("Template criado com sucesso!");
+      setTemplateForm({ titulo: "", conteudo: "", variaveis: "", categoria: "geral" });
+      setIsDialogOpen(false);
+      refetchTemplates();
+    },
+    onError: () => {
+      toast.error("Erro ao criar template");
+    },
+  });
+
+  const updateTemplateMutation = trpc.whatsapp.templates.update.useMutation({
+    onSuccess: () => {
+      toast.success("Template atualizado com sucesso!");
+      setTemplateForm({ titulo: "", conteudo: "", variaveis: "", categoria: "geral" });
+      setEditingTemplate(null);
+      setIsDialogOpen(false);
+      refetchTemplates();
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar template");
+    },
+  });
+
+  const deleteTemplateMutation = trpc.whatsapp.templates.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Template deletado com sucesso!");
+      refetchTemplates();
+    },
+    onError: () => {
+      toast.error("Erro ao deletar template");
+    },
+  });
+
+  // ========== DOCUMENTOS ==========
+  const { data: documentos = [], isLoading: loadingDocumentos, refetch: refetchDocumentos } = 
+    trpc.whatsapp.documentos.list.useQuery();
+
+  const createDocumentoMutation = trpc.whatsapp.documentos.create.useMutation({
+    onSuccess: () => {
+      toast.success("Documento criado com sucesso!");
+      setDocumentoForm({ nome: "", descricao: "" });
+      setIsDialogOpen(false);
+      refetchDocumentos();
+    },
+    onError: () => {
+      toast.error("Erro ao criar documento");
+    },
+  });
+
+  const deleteDocumentoMutation = trpc.whatsapp.documentos.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Documento deletado com sucesso!");
+      refetchDocumentos();
+    },
+    onError: () => {
+      toast.error("Erro ao deletar documento");
+    },
+  });
+
+  // ========== HANDLERS ==========
+  const handleTemplateSubmit = async () => {
     if (!templateForm.titulo || !templateForm.conteudo) {
-      toast.error("Preencha todos os campos!");
+      toast.error("Preencha os campos obrigatórios!");
       return;
     }
 
     if (editingTemplate) {
-      toast.success("Template atualizado com sucesso!");
+      await updateTemplateMutation.mutateAsync({
+        id: editingTemplate,
+        titulo: templateForm.titulo,
+        conteudo: templateForm.conteudo,
+        variaveis: templateForm.variaveis || undefined,
+        categoria: templateForm.categoria,
+      });
     } else {
-      toast.success("Template criado com sucesso!");
+      await createTemplateMutation.mutateAsync({
+        titulo: templateForm.titulo,
+        conteudo: templateForm.conteudo,
+        variaveis: templateForm.variaveis || undefined,
+        categoria: templateForm.categoria,
+      });
     }
-
-    setTemplateForm({ titulo: "", conteudo: "", categoria: "geral" });
-    setEditingTemplate(null);
-    setIsDialogOpen(false);
   };
 
+  const handleEditTemplate = (template: any) => {
+    setEditingTemplate(template.id);
+    setTemplateForm({
+      titulo: template.titulo,
+      conteudo: template.conteudo,
+      variaveis: template.variaveis || "",
+      categoria: template.categoria || "geral",
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteTemplate = (id: number) => {
+    if (confirm("Tem certeza que deseja deletar este template?")) {
+      deleteTemplateMutation.mutate({ id });
+    }
+  };
+
+  const handleDeleteDocumento = (id: number) => {
+    if (confirm("Tem certeza que deseja deletar este documento?")) {
+      deleteDocumentoMutation.mutate({ id });
+    }
+  };
+
+  const handleDeleteConversa = (id: number) => {
+    if (confirm("Tem certeza que deseja deletar esta conversa?")) {
+      deleteConversaMutation.mutate({ id });
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    try {
+      // Simular upload - em produção, usar storagePut
+      const mockUrl = URL.createObjectURL(file);
+      
+      await createDocumentoMutation.mutateAsync({
+        nome: file.name,
+        urlArquivo: mockUrl,
+        tipoArquivo: file.type,
+        tamanhoBytes: file.size,
+        descricao: documentoForm.descricao || undefined,
+      });
+
+      setDocumentoForm({ nome: "", descricao: "" });
+    } catch (error) {
+      toast.error("Erro ao fazer upload do arquivo");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const openNewTemplateDialog = () => {
+    setEditingTemplate(null);
+    setTemplateForm({ titulo: "", conteudo: "", variaveis: "", categoria: "geral" });
+    setIsDialogOpen(true);
+  };
+
+  // ========== RENDER ==========
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <MessageCircle className="h-8 w-8 text-green-600" />
-              WhatsApp - Atendimento ao Cliente
-            </h1>
-            <p className="text-gray-500 mt-2">Gerencie conversas, templates e documentos de consulta</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="gap-2">
-              <Settings className="h-4 w-4" />
-              Configurações
-            </Button>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">WhatsApp</h1>
+          <p className="text-sm text-muted-foreground mt-1">Gerenciar conversas, templates e documentos</p>
         </div>
-
-        {/* Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Status da Conexão</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-lg font-bold text-green-600">Conectado</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">Número: +55 11 97263-2473</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Conversas Ativas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-2xl font-bold text-blue-600">2</span>
-              <p className="text-xs text-gray-500 mt-2">Aguardando resposta</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Mensagens Hoje</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-2xl font-bold text-purple-600">24</span>
-              <p className="text-xs text-gray-500 mt-2">Enviadas e recebidas</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Taxa de Resposta</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className="text-2xl font-bold text-orange-600">94%</span>
-              <p className="text-xs text-gray-500 mt-2">Média em 2 minutos</p>
-            </CardContent>
-          </Card>
+        <div className="flex gap-2">
+          <Badge variant="outline" className="flex items-center gap-1">
+            <CheckCircle className="w-4 h-4 text-green-500" />
+            Conectado
+          </Badge>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="conversas">Conversas</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="documentos">Documentos</TabsTrigger>
-            <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
-          </TabsList>
+      {/* Status Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Conversas Ativas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{conversas.filter((c: any) => c.statusConversa === "Ativa").length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total de conversas</p>
+          </CardContent>
+        </Card>
 
-          {/* TAB 1: CONVERSAS */}
-          <TabsContent value="conversas" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Histórico de Conversas</CardTitle>
-                <CardDescription>Todas as conversas com clientes via WhatsApp</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Filtros */}
-                  <div className="flex gap-2">
-                    <Input placeholder="Buscar por cliente ou telefone..." className="flex-1" />
-                    <Button variant="outline">Filtrar</Button>
-                  </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Mensagens Hoje</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{allMensagens.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Mensagens recebidas</p>
+          </CardContent>
+        </Card>
 
-                  {/* Tabela de Conversas */}
-                  <div className="border rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gray-50">
-                          <TableHead>Cliente</TableHead>
-                          <TableHead>Telefone</TableHead>
-                          <TableHead>Última Mensagem</TableHead>
-                          <TableHead>Horário</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Ações</TableHead>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Templates</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{templates.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Respostas pré-configuradas</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Documentos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{documentos.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Arquivos de consulta</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="conversas" className="flex items-center gap-2">
+            <MessageCircle className="w-4 h-4" />
+            Conversas
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Templates
+          </TabsTrigger>
+          <TabsTrigger value="documentos" className="flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            Documentos
+          </TabsTrigger>
+          <TabsTrigger value="estatisticas" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Estatísticas
+          </TabsTrigger>
+        </TabsList>
+
+        {/* TAB: CONVERSAS */}
+        <TabsContent value="conversas" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Histórico de Conversas</CardTitle>
+              <CardDescription>Todas as conversas com clientes via WhatsApp</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingConversas ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : conversas.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Nenhuma conversa ainda</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead>Telefone</TableHead>
+                        <TableHead>Última Mensagem</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Data/Hora</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {conversas.map((conversa: any) => (
+                        <TableRow key={conversa.id}>
+                          <TableCell className="font-medium">{conversa.nomeCliente || "Cliente"}</TableCell>
+                          <TableCell className="font-mono text-sm">{conversa.numeroCliente}</TableCell>
+                          <TableCell className="max-w-xs truncate">{conversa.ultimaMensagem || "-"}</TableCell>
+                          <TableCell>
+                            <Badge variant={conversa.statusConversa === "Ativa" ? "default" : "secondary"}>
+                              {conversa.statusConversa}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {conversa.dataUltimaMsg ? new Date(conversa.dataUltimaMsg).toLocaleString("pt-BR") : "-"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteConversa(conversa.id)}
+                              disabled={deleteConversaMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {conversas.map((conversa) => (
-                          <TableRow key={conversa.id}>
-                            <TableCell className="font-medium">{conversa.cliente}</TableCell>
-                            <TableCell>{conversa.telefone}</TableCell>
-                            <TableCell className="max-w-xs truncate">{conversa.ultimaMensagem}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1 text-sm text-gray-600">
-                                <Clock className="h-4 w-4" />
-                                {conversa.horario}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={conversa.status === "ativo" ? "default" : "secondary"}
-                                className={
-                                  conversa.status === "ativo"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-gray-100 text-gray-800"
-                                }
-                              >
-                                {conversa.status === "ativo" ? "🟢 Ativo" : "⚪ Encerrado"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button size="sm" variant="ghost" className="gap-1">
-                                  <MessageCircle className="h-4 w-4" />
-                                  Ver
-                                </Button>
-                                <Button size="sm" variant="ghost" className="gap-1">
-                                  <Phone className="h-4 w-4" />
-                                  Ligar
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          {/* TAB 2: TEMPLATES */}
-          <TabsContent value="templates" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-start">
+        {/* TAB: TEMPLATES */}
+        <TabsContent value="templates" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-semibold">Respostas Pré-configuradas</h2>
+              <p className="text-sm text-muted-foreground">Templates de mensagens rápidas com variáveis dinâmicas</p>
+            </div>
+            <Dialog open={isDialogOpen && activeTab === "templates"} onOpenChange={(open) => {
+              if (!open) {
+                setEditingTemplate(null);
+                setTemplateForm({ titulo: "", conteudo: "", variaveis: "", categoria: "geral" });
+              }
+              setIsDialogOpen(open);
+            }}>
+              <DialogTrigger asChild>
+                <Button onClick={openNewTemplateDialog} className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Novo Template
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingTemplate ? "Editar Template" : "Novo Template"}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
                   <div>
-                    <CardTitle>Templates de Resposta</CardTitle>
-                    <CardDescription>Respostas pré-ajustadas para agilizar o atendimento</CardDescription>
+                    <Label htmlFor="titulo">Título</Label>
+                    <Input
+                      id="titulo"
+                      placeholder="Ex: Saudação Inicial"
+                      value={templateForm.titulo}
+                      onChange={(e) => setTemplateForm({ ...templateForm, titulo: e.target.value })}
+                    />
                   </div>
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        Novo Template
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>
-                          {editingTemplate ? "Editar Template" : "Criar Novo Template"}
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Título do Template</Label>
-                          <Input
-                            placeholder="Ex: Saudação Inicial"
-                            value={templateForm.titulo}
-                            onChange={(e) =>
-                              setTemplateForm({ ...templateForm, titulo: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label>Categoria</Label>
-                          <select
-                            className="w-full border rounded-md p-2"
-                            value={templateForm.categoria}
-                            onChange={(e) =>
-                              setTemplateForm({ ...templateForm, categoria: e.target.value })
-                            }
-                          >
-                            <option value="geral">Geral</option>
-                            <option value="servicos">Serviços</option>
-                            <option value="orcamento">Orçamento</option>
-                            <option value="agendamento">Agendamento</option>
-                            <option value="pagamento">Pagamento</option>
-                            <option value="suporte">Suporte</option>
-                          </select>
-                        </div>
-                        <div>
-                          <Label>Conteúdo da Mensagem</Label>
-                          <textarea
-                            className="w-full border rounded-md p-2 font-mono text-sm"
-                            rows={6}
-                            placeholder="Digite a mensagem. Use {{variavel}} para campos dinâmicos"
-                            value={templateForm.conteudo}
-                            onChange={(e) =>
-                              setTemplateForm({ ...templateForm, conteudo: e.target.value })
-                            }
-                          />
-                          <p className="text-xs text-gray-500 mt-2">
-                            Variáveis disponíveis: cliente, data, horario, valor
-                          </p>                        </div>
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setIsDialogOpen(false);
-                              setEditingTemplate(null);
-                              setTemplateForm({ titulo: "", conteudo: "", categoria: "geral" });
-                            }}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button onClick={handleTemplateSubmit}>
-                            {editingTemplate ? "Atualizar" : "Criar"} Template
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {templates.map((template) => (
-                    <div
-                      key={template.id}
-                      className="border rounded-lg p-4 hover:bg-gray-50 transition"
+                  <div>
+                    <Label htmlFor="categoria">Categoria</Label>
+                    <Input
+                      id="categoria"
+                      placeholder="Ex: geral, serviços, orçamento"
+                      value={templateForm.categoria}
+                      onChange={(e) => setTemplateForm({ ...templateForm, categoria: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="conteudo">Conteúdo</Label>
+                    <textarea
+                      id="conteudo"
+                      placeholder="Digite o conteúdo da mensagem..."
+                      value={templateForm.conteudo}
+                      onChange={(e) => setTemplateForm({ ...templateForm, conteudo: e.target.value })}
+                      className="w-full min-h-32 p-2 border rounded-md bg-background text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="variaveis">Variáveis (JSON)</Label>
+                    <Input
+                      id="variaveis"
+                      placeholder='["{{nome}}", "{{email}}", "{{telefone}}"]'
+                      value={templateForm.variaveis}
+                      onChange={(e) => setTemplateForm({ ...templateForm, variaveis: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Use {'{{'} variável {'}}'} para campos dinâmicos</p>
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                        setEditingTemplate(null);
+                      }}
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">{template.titulo}</h4>
-                          <Badge variant="outline" className="mt-1">
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={handleTemplateSubmit}
+                      disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}
+                    >
+                      {createTemplateMutation.isPending || updateTemplateMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        "Salvar Template"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {loadingTemplates ? (
+              <div className="col-span-2 flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : templates.length === 0 ? (
+              <div className="col-span-2 text-center py-8 text-muted-foreground">
+                <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>Nenhum template criado ainda</p>
+              </div>
+            ) : (
+              templates.map((template: any) => (
+                <Card key={template.id} className="flex flex-col">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-base">{template.titulo}</CardTitle>
+                        {template.categoria && (
+                          <Badge variant="secondary" className="mt-2">
                             {template.categoria}
                           </Badge>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              setEditingTemplate(template.id);
-                              setTemplateForm({
-                                titulo: template.titulo,
-                                conteudo: template.conteudo,
-                                categoria: template.categoria,
-                              });
-                              setIsDialogOpen(true);
-                            }}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <p className="text-gray-700 text-sm whitespace-pre-wrap">{template.conteudo}</p>
-                      <div className="flex gap-2 mt-3">
-                        <Button size="sm" variant="outline" className="gap-1">
-                          <Send className="h-3 w-3" />
-                          Usar Template
-                        </Button>
-                        <Button size="sm" variant="ghost" className="gap-1">
-                          <Copy className="h-3 w-3" />
-                          Copiar
-                        </Button>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                  </CardHeader>
+                  <CardContent className="flex-1 pb-3">
+                    <p className="text-sm text-muted-foreground line-clamp-4">{template.conteudo}</p>
+                  </CardContent>
+                  <div className="px-6 py-3 border-t flex gap-2 justify-between">
+                    <div className="text-xs text-muted-foreground">
+                      Usado {template.vezesUsado || 0}x
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditTemplate(template)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteTemplate(template.id)}
+                        disabled={deleteTemplateMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
 
-          {/* TAB 3: DOCUMENTOS */}
-          <TabsContent value="documentos" className="space-y-4">
+        {/* TAB: DOCUMENTOS */}
+        <TabsContent value="documentos" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-semibold">Documentos de Consulta</h2>
+              <p className="text-sm text-muted-foreground">Arquivos para contexto da IA nas respostas</p>
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Upload className="w-4 h-4" />
+                  Upload Documento
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Upload de Documento</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="file">Selecione o arquivo</Label>
+                    <Input
+                      id="file"
+                      type="file"
+                      onChange={handleFileUpload}
+                      disabled={uploadingFile}
+                      accept=".pdf,.docx,.txt,.doc"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Formatos: PDF, DOCX, TXT</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="descricao">Descrição (opcional)</Label>
+                    <Input
+                      id="descricao"
+                      placeholder="Descrição do documento..."
+                      value={documentoForm.descricao}
+                      onChange={(e) => setDocumentoForm({ ...documentoForm, descricao: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Tamanho</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Data Upload</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loadingDocumentos ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground mx-auto" />
+                    </TableCell>
+                  </TableRow>
+                ) : documentos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      Nenhum documento enviado
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  documentos.map((doc: any) => (
+                    <TableRow key={doc.id}>
+                      <TableCell className="font-medium">{doc.nome}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {doc.tipoArquivo || "Arquivo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {doc.tamanhoBytes ? `${(doc.tamanhoBytes / 1024).toFixed(1)} KB` : "-"}
+                      </TableCell>
+                      <TableCell className="text-sm max-w-xs truncate">
+                        {doc.descricao || "-"}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(doc.createdAt).toLocaleDateString("pt-BR")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(doc.urlArquivo)}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteDocumento(doc.id)}
+                            disabled={deleteDocumentoMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
+        {/* TAB: ESTATÍSTICAS */}
+        <TabsContent value="estatisticas" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>Documentos de Consulta</CardTitle>
-                    <CardDescription>
-                      Arquivos para o bot consultar ao responder clientes
-                    </CardDescription>
-                  </div>
-                  <Button className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    Upload de Arquivo
-                  </Button>
-                </div>
+                <CardTitle className="text-base">Mensagens por Status</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {documentos.map((doc) => (
-                    <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50 transition">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3 flex-1">
-                          <FileText className="h-8 w-8 text-blue-600 mt-1" />
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900">{doc.nome}</h4>
-                            <div className="flex gap-4 text-sm text-gray-600 mt-1">
-                              <span>📄 {doc.tipo}</span>
-                              <span>💾 {doc.tamanho}</span>
-                              <span>📅 {doc.dataUpload}</span>
-                            </div>
-                            <Badge variant="outline" className="mt-2">
-                              {doc.categoria}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="ghost" className="gap-1">
-                            <Download className="h-4 w-4" />
-                            Baixar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Área de Upload */}
-                <div className="mt-6 border-2 border-dashed rounded-lg p-8 text-center">
-                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 font-medium">Arraste arquivos aqui ou clique para selecionar</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Suportados: PDF, DOCX, TXT, XLS (máx. 10MB)
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Não Lidas</span>
+                    <span className="font-semibold">{allMensagens.filter((m: any) => !m.lida).length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Lidas</span>
+                    <span className="font-semibold">{allMensagens.filter((m: any) => m.lida).length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Total</span>
+                    <span className="font-semibold">{allMensagens.length}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* TAB 4: ESTATÍSTICAS */}
-          <TabsContent value="estatisticas" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Mensagens por Hora
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500">Gráfico de mensagens por hora</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Tipos de Atendimento</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Orçamentos</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full w-1/3 bg-blue-600"></div>
-                        </div>
-                        <span className="text-sm font-semibold">35%</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Agendamentos</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full w-2/5 bg-green-600"></div>
-                        </div>
-                        <span className="text-sm font-semibold">40%</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Suporte</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full w-1/4 bg-orange-600"></div>
-                        </div>
-                        <span className="text-sm font-semibold">25%</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
 
             <Card>
               <CardHeader>
-                <CardTitle>Resumo de Desempenho</CardTitle>
+                <CardTitle className="text-base">Conversas por Status</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="border rounded-lg p-4">
-                    <p className="text-sm text-gray-600 mb-2">Tempo Médio de Resposta</p>
-                    <p className="text-2xl font-bold text-blue-600">2m 15s</p>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Ativas</span>
+                    <span className="font-semibold">{conversas.filter((c: any) => c.statusConversa === "Ativa").length}</span>
                   </div>
-                  <div className="border rounded-lg p-4">
-                    <p className="text-sm text-gray-600 mb-2">Taxa de Satisfação</p>
-                    <p className="text-2xl font-bold text-green-600">4.8/5 ⭐</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Arquivadas</span>
+                    <span className="font-semibold">{conversas.filter((c: any) => c.statusConversa === "Arquivada").length}</span>
                   </div>
-                  <div className="border rounded-lg p-4">
-                    <p className="text-sm text-gray-600 mb-2">Conversas Resolvidas</p>
-                    <p className="text-2xl font-bold text-purple-600">87%</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Total</span>
+                    <span className="font-semibold">{conversas.length}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
-  );
-}
-
-// Helper component para Copy icon
-function Copy(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-    </svg>
   );
 }

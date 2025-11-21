@@ -468,3 +468,39 @@
 - [x] Implementar filtros por período (mês, trimestre, ano)
 - [ ] Adicionar exportação de gráficos
 - [ ] Criar visualização de comparação mês a mês
+
+
+## Integração Completa de WhatsApp (Conversas, Templates, Documentos)
+
+### Fase 1: Banco de Dados de WhatsApp
+- [x] Criar tabela `conversasWhatsapp` (id, numeroCliente, nomeCliente, ultimaMensagem, dataUltimaMsg, statusConversa, createdAt, updatedAt)
+- [x] Criar tabela `mensagensWhatsapp` (id, conversaId, remetente, mensagem, tipo, anexoUrl, dataEnvio, lida, createdAt)
+- [x] Criar tabela `templatesWhatsapp` (id, titulo, conteudo, variaveis, categoria, ativo, createdAt, updatedAt)
+- [x] Criar tabela `documentosWhatsapp` (id, nome, urlArquivo, tipoArquivo, tamanhoBytes, descricao, createdAt)
+
+### Fase 2: Backend tRPC
+- [x] Implementar CRUD de conversas WhatsApp
+- [x] Implementar CRUD de mensagens WhatsApp
+- [x] Implementar CRUD de templates WhatsApp
+- [x] Implementar CRUD de documentos WhatsApp
+- [x] Criar endpoints para buscar conversas, templates e documentos
+
+### Fase 3: Conectar Página WhatsApp.tsx
+- [x] Conectar aba Conversas aos dados do banco
+- [x] Conectar aba Templates aos dados do banco
+- [x] Conectar aba Documentos aos dados do banco
+- [x] Implementar criação/edição/exclusão de templates
+- [x] Implementar upload de documentos
+
+### Fase 4: Webhook e Integração Twilio
+- [ ] Registrar webhook com Twilio
+- [ ] Implementar recebimento de mensagens
+- [ ] Salvar mensagens no banco de dados
+- [ ] Integrar com ChatGPT para respostas automáticas
+
+### Fase 5: Testes e Checkpoint
+- [x] Testar exibição de conversas
+- [x] Testar CRUD de templates
+- [x] Testar upload de documentos
+- [ ] Testar recebimento de mensagens
+- [ ] Criar checkpoint final

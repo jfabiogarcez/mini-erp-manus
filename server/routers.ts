@@ -887,6 +887,221 @@ Retorne em formato markdown.
         };
       }),
   }),
+  whatsapp: router({
+    // ========== CONVERSAS ==========
+    conversas: router({
+      list: publicProcedure.query(async () => {
+        const { getAllConversas } = await import("./db");
+        return getAllConversas();
+      }),
+      getByNumero: publicProcedure
+        .input(z.object({ numeroCliente: z.string() }))
+        .query(async ({ input }) => {
+          const { getConversaByNumero } = await import("./db");
+          return getConversaByNumero(input.numeroCliente);
+        }),
+      create: publicProcedure
+        .input(
+          z.object({
+            numeroCliente: z.string(),
+            nomeCliente: z.string().optional(),
+            ultimaMensagem: z.string().optional(),
+            dataUltimaMsg: z.date().optional(),
+            statusConversa: z.enum(["Ativa", "Arquivada", "Bloqueada"]).default("Ativa"),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { createConversa } = await import("./db");
+          const id = await createConversa(input);
+          return { id };
+        }),
+      update: publicProcedure
+        .input(
+          z.object({
+            id: z.number(),
+            numeroCliente: z.string().optional(),
+            nomeCliente: z.string().optional(),
+            ultimaMensagem: z.string().optional(),
+            dataUltimaMsg: z.date().optional(),
+            statusConversa: z.enum(["Ativa", "Arquivada", "Bloqueada"]).optional(),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { updateConversa } = await import("./db");
+          const { id, ...data } = input;
+          await updateConversa(id, data);
+          return { success: true };
+        }),
+      delete: publicProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          const { deleteConversa } = await import("./db");
+          await deleteConversa(input.id);
+          return { success: true };
+        }),
+    }),
+    // ========== MENSAGENS ==========
+    mensagens: router({
+      list: publicProcedure.query(async () => {
+        const { getAllMensagens } = await import("./db");
+        return getAllMensagens();
+      }),
+      getByConversa: publicProcedure
+        .input(z.object({ conversaId: z.number() }))
+        .query(async ({ input }) => {
+          const { getMensagensConversa } = await import("./db");
+          return getMensagensConversa(input.conversaId);
+        }),
+      create: publicProcedure
+        .input(
+          z.object({
+            conversaId: z.number(),
+            remetente: z.enum(["Cliente", "Sistema"]),
+            mensagem: z.string(),
+            tipo: z.enum(["Texto", "Imagem", "Documento", "Áudio", "Vídeo"]).default("Texto"),
+            anexoUrl: z.string().optional(),
+            dataEnvio: z.date(),
+            lida: z.number().default(0),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { createMensagem } = await import("./db");
+          const id = await createMensagem(input);
+          return { id };
+        }),
+      update: publicProcedure
+        .input(
+          z.object({
+            id: z.number(),
+            lida: z.number().optional(),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { updateMensagem } = await import("./db");
+          const { id, ...data } = input;
+          await updateMensagem(id, data);
+          return { success: true };
+        }),
+      delete: publicProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          const { deleteMensagem } = await import("./db");
+          await deleteMensagem(input.id);
+          return { success: true };
+        }),
+    }),
+    // ========== TEMPLATES ==========
+    templates: router({
+      list: publicProcedure.query(async () => {
+        const { getAllTemplates } = await import("./db");
+        return getAllTemplates();
+      }),
+      getById: publicProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => {
+          const { getTemplateById } = await import("./db");
+          return getTemplateById(input.id);
+        }),
+      create: publicProcedure
+        .input(
+          z.object({
+            titulo: z.string(),
+            conteudo: z.string(),
+            variaveis: z.string().optional(),
+            categoria: z.string().optional(),
+            ativo: z.number().default(1),
+            vezesUsado: z.number().default(0),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { createTemplate } = await import("./db");
+          const id = await createTemplate(input);
+          return { id };
+        }),
+      update: publicProcedure
+        .input(
+          z.object({
+            id: z.number(),
+            titulo: z.string().optional(),
+            conteudo: z.string().optional(),
+            variaveis: z.string().optional(),
+            categoria: z.string().optional(),
+            ativo: z.number().optional(),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { updateTemplate } = await import("./db");
+          const { id, ...data } = input;
+          await updateTemplate(id, data);
+          return { success: true };
+        }),
+      delete: publicProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          const { deleteTemplate } = await import("./db");
+          await deleteTemplate(input.id);
+          return { success: true };
+        }),
+      incrementUsage: publicProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          const { incrementTemplateUsage } = await import("./db");
+          await incrementTemplateUsage(input.id);
+          return { success: true };
+        }),
+    }),
+    // ========== DOCUMENTOS ==========
+    documentos: router({
+      list: publicProcedure.query(async () => {
+        const { getAllDocumentos } = await import("./db");
+        return getAllDocumentos();
+      }),
+      getById: publicProcedure
+        .input(z.object({ id: z.number() }))
+        .query(async ({ input }) => {
+          const { getDocumentoById } = await import("./db");
+          return getDocumentoById(input.id);
+        }),
+      create: publicProcedure
+        .input(
+          z.object({
+            nome: z.string(),
+            urlArquivo: z.string(),
+            tipoArquivo: z.string().optional(),
+            tamanhoBytes: z.number().optional(),
+            descricao: z.string().optional(),
+            conteudoExtraido: z.string().optional(),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { createDocumento } = await import("./db");
+          const id = await createDocumento(input);
+          return { id };
+        }),
+      update: publicProcedure
+        .input(
+          z.object({
+            id: z.number(),
+            nome: z.string().optional(),
+            descricao: z.string().optional(),
+            conteudoExtraido: z.string().optional(),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { updateDocumento } = await import("./db");
+          const { id, ...data } = input;
+          await updateDocumento(id, data);
+          return { success: true };
+        }),
+      delete: publicProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(async ({ input }) => {
+          const { deleteDocumento } = await import("./db");
+          await deleteDocumento(input.id);
+          return { success: true };
+        }),
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

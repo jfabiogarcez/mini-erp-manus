@@ -950,3 +950,193 @@ export async function getRelatorioByPeriodo(mes: number, ano: number, tipo: "Mis
   
   return result.length > 0 ? result[0] : undefined;
 }
+
+
+// ========== WHATSAPP: CONVERSAS ==========
+
+import { conversasWhatsapp, InsertConversaWhatsapp, ConversaWhatsapp } from "../drizzle/schema";
+
+export async function createConversa(conversa: InsertConversaWhatsapp): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(conversasWhatsapp).values(conversa);
+  return Number((result as any).insertId);
+}
+
+export async function getConversaByNumero(numeroCliente: string): Promise<ConversaWhatsapp | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(conversasWhatsapp)
+    .where(eq(conversasWhatsapp.numeroCliente, numeroCliente))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllConversas(): Promise<ConversaWhatsapp[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(conversasWhatsapp)
+    .orderBy(desc(conversasWhatsapp.dataUltimaMsg));
+}
+
+export async function updateConversa(id: number, conversa: Partial<InsertConversaWhatsapp>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(conversasWhatsapp).set(conversa).where(eq(conversasWhatsapp.id, id));
+}
+
+export async function deleteConversa(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(conversasWhatsapp).where(eq(conversasWhatsapp.id, id));
+}
+
+// ========== WHATSAPP: MENSAGENS ==========
+
+import { mensagensWhatsapp, InsertMensagemWhatsapp, MensagemWhatsapp } from "../drizzle/schema";
+
+export async function createMensagem(mensagem: InsertMensagemWhatsapp): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(mensagensWhatsapp).values(mensagem);
+  return Number((result as any).insertId);
+}
+
+export async function getMensagensConversa(conversaId: number): Promise<MensagemWhatsapp[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(mensagensWhatsapp)
+    .where(eq(mensagensWhatsapp.conversaId, conversaId))
+    .orderBy(desc(mensagensWhatsapp.dataEnvio));
+}
+
+export async function getAllMensagens(): Promise<MensagemWhatsapp[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(mensagensWhatsapp)
+    .orderBy(desc(mensagensWhatsapp.dataEnvio));
+}
+
+export async function updateMensagem(id: number, mensagem: Partial<InsertMensagemWhatsapp>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(mensagensWhatsapp).set(mensagem).where(eq(mensagensWhatsapp.id, id));
+}
+
+export async function deleteMensagem(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(mensagensWhatsapp).where(eq(mensagensWhatsapp.id, id));
+}
+
+// ========== WHATSAPP: TEMPLATES ==========
+
+import { templatesWhatsapp, InsertTemplateWhatsapp, TemplateWhatsapp } from "../drizzle/schema";
+
+export async function createTemplate(template: InsertTemplateWhatsapp): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(templatesWhatsapp).values(template);
+  return Number((result as any).insertId);
+}
+
+export async function getTemplateById(id: number): Promise<TemplateWhatsapp | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(templatesWhatsapp)
+    .where(eq(templatesWhatsapp.id, id))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllTemplates(): Promise<TemplateWhatsapp[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(templatesWhatsapp)
+    .where(eq(templatesWhatsapp.ativo, 1))
+    .orderBy(desc(templatesWhatsapp.createdAt));
+}
+
+export async function updateTemplate(id: number, template: Partial<InsertTemplateWhatsapp>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(templatesWhatsapp).set(template).where(eq(templatesWhatsapp.id, id));
+}
+
+export async function deleteTemplate(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(templatesWhatsapp).where(eq(templatesWhatsapp.id, id));
+}
+
+export async function incrementTemplateUsage(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const template = await getTemplateById(id);
+  if (template) {
+    await updateTemplate(id, { vezesUsado: (template.vezesUsado || 0) + 1 });
+  }
+}
+
+// ========== WHATSAPP: DOCUMENTOS ==========
+
+import { documentosWhatsapp, InsertDocumentoWhatsapp, DocumentoWhatsapp } from "../drizzle/schema";
+
+export async function createDocumento(documento: InsertDocumentoWhatsapp): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(documentosWhatsapp).values(documento);
+  return Number((result as any).insertId);
+}
+
+export async function getDocumentoById(id: number): Promise<DocumentoWhatsapp | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(documentosWhatsapp)
+    .where(eq(documentosWhatsapp.id, id))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllDocumentos(): Promise<DocumentoWhatsapp[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(documentosWhatsapp)
+    .orderBy(desc(documentosWhatsapp.createdAt));
+}
+
+export async function updateDocumento(id: number, documento: Partial<InsertDocumentoWhatsapp>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(documentosWhatsapp).set(documento).where(eq(documentosWhatsapp.id, id));
+}
+
+export async function deleteDocumento(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(documentosWhatsapp).where(eq(documentosWhatsapp.id, id));
+}
