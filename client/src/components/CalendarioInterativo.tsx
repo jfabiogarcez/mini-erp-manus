@@ -1,8 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
+import { Calendar as BigCalendar, dateFnsLocalizer, View } from 'react-big-calendar';
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
+
+const Calendar = withDragAndDrop(BigCalendar);
 import { trpc } from '@/lib/trpc';
 import {
   Dialog,
@@ -15,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Calendar as CalendarIcon, MapPin, User, Car, DollarSign, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const locales = {
   'pt-BR': ptBR,
@@ -45,6 +50,17 @@ export default function CalendarioInterativo() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showMissoes, setShowMissoes] = useState(true);
   const [showMultas, setShowMultas] = useState(true);
+  
+  const utils = trpc.useUtils();
+  const updateMissao = trpc.missoes.update.useMutation({
+    onSuccess: () => {
+      utils.missoes.list.invalidate();
+      toast.success('✅ Missão reagendada com sucesso!');
+    },
+    onError: (error) => {
+      toast.error('❌ Erro ao reagendar missão: ' + error.message);
+    },
+  });
 
   // Buscar missões e multas
   const { data: missoes } = trpc.missoes.list.useQuery();
@@ -96,7 +112,7 @@ export default function CalendarioInterativo() {
   }, [missoes, multas, showMissoes, showMultas]);
 
   // Estilo dos eventos
-  const eventStyleGetter = (event: CalendarEvent) => {
+  const eventStyleGetter = (event: any) => {
     const isMissao = event.resource.type === 'missao';
     
     return {
@@ -113,8 +129,22 @@ export default function CalendarioInterativo() {
     };
   };
 
-  const handleSelectEvent = (event: CalendarEvent) => {
+  const handleSelectEvent = (event: any) => {
     setSelectedEvent(event);
+  };
+
+  const handleEventDrop = ({ event, start, end }: any) => {
+    // Apenas permitir arrastar missões, não multas
+    if (event.resource.type !== 'missao') {
+      toast.error('⚠️ Apenas missões podem ser reagendadas');
+      return;
+    }
+
+    // Atualizar a data da missão
+    updateMissao.mutate({
+      id: event.id,
+      data: start,
+    });
   };
 
   const formatarMoeda = (centavos: number) => {
@@ -170,8 +200,8 @@ export default function CalendarioInterativo() {
         <Calendar
           localizer={localizer}
           events={events}
-          startAccessor="start"
-          endAccessor="end"
+          startAccessor={(event: any) => event.start}
+          endAccessor={(event: any) => event.end}
           style={{ height: '100%' }}
           onSelectEvent={handleSelectEvent}
           eventPropGetter={eventStyleGetter}
@@ -179,6 +209,9 @@ export default function CalendarioInterativo() {
           onView={setView}
           date={date}
           onNavigate={setDate}
+          draggableAccessor={() => true}
+          onEventDrop={handleEventDrop}
+          resizable={false}
           messages={{
             next: 'Próximo',
             previous: 'Anterior',

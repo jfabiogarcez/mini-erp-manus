@@ -417,3 +417,32 @@
 - [x] Implementar filtros para mostrar/ocultar missões ou multas
 - [x] Adicionar visualização de mês e semana
 - [x] Testar interatividade e responsividade
+
+### 14. Arrastar e Soltar no Calendário
+- [x] Adicionar funcionalidade de drag-and-drop no calendário
+- [x] Criar endpoint para atualizar data de missão
+- [x] Implementar confirmação visual ao arrastar evento
+- [x] Atualizar banco de dados automaticamente ao soltar
+- [x] Adicionar feedback de sucesso/erro
+
+### 15. Sistema de Notificações Automáticas
+- [x] Criar tabela de notificações agendadas no banco
+- [x] Implementar verificação diária de missões e multas
+- [x] Criar templates de notificação para missões (24h antes)
+- [x] Criar templates de notificação para multas (3 dias antes)
+- [x] Implementar envio de notificações por e-mail
+- [ ] Implementar envio de notificações por WhatsApp
+- [ ] Adicionar configuração de horários preferenciais
+- [x] Criar histórico de notificações enviadas
+
+### 16. Página Completa de Missões
+- [x] Criar interface dedicada para Missões
+- [x] Implementar tabela de missões com todas as colunas
+- [x] Adicionar formulário de criação de missão
+- [x] Adicionar formulário de edição de missão
+- [x] Implementar exclusão de missões
+- [x] Adicionar filtros avançados (status, motorista, data)
+- [x] Integrar botão de upload de arquivos existente
+- [x] Adicionar busca por texto
+- [ ] Implementar paginação
+- [ ] Adicionar exportação para Excel

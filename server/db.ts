@@ -107,7 +107,6 @@ export async function gerarCodigoMissao(): Promise<string> {
   const ultimaMissao = await db
     .select()
     .from(missoes)
-    .where(eq(missoes.codigoMissao, prefixo))
     .orderBy(desc(missoes.id))
     .limit(1);
 
@@ -129,7 +128,11 @@ export async function createMissao(missao: Omit<InsertMissao, "codigoMissao">): 
 
   const codigoMissao = await gerarCodigoMissao();
   const result = await db.insert(missoes).values({ ...missao, codigoMissao });
-  return Number((result as any).insertId);
+  const insertId = (result as any)[0]?.insertId || (result as any).insertId;
+  if (!insertId || isNaN(Number(insertId))) {
+    throw new Error("Failed to get insertId from database");
+  }
+  return Number(insertId);
 }
 
 export async function getAllMissoes() {

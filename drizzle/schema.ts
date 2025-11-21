@@ -374,3 +374,26 @@ export const relatorios = mysqlTable("relatorios", {
 
 export type Relatorio = typeof relatorios.$inferSelect;
 export type InsertRelatorio = typeof relatorios.$inferInsert;
+
+/**
+ * Tabela de notificações agendadas e enviadas
+ * Armazena histórico de notificações automáticas
+ */
+export const notificacoes = mysqlTable("notificacoes", {
+  id: int("id").autoincrement().primaryKey(),
+  tipo: mysqlEnum("tipo", ["Missão", "Multa"]).notNull(),
+  referenciaId: int("referenciaId").notNull(), // ID da missão ou multa
+  canal: mysqlEnum("canal", ["Email", "WhatsApp", "Ambos"]).notNull(),
+  destinatario: varchar("destinatario", { length: 320 }).notNull(), // Email ou telefone
+  assunto: varchar("assunto", { length: 255 }).notNull(),
+  mensagem: text("mensagem").notNull(),
+  dataAgendamento: timestamp("dataAgendamento").notNull(), // Quando deve ser enviada
+  dataEnvio: timestamp("dataEnvio"), // Quando foi realmente enviada
+  status: mysqlEnum("status", ["Agendada", "Enviada", "Erro", "Cancelada"]).default("Agendada").notNull(),
+  erroMensagem: text("erroMensagem"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Notificacao = typeof notificacoes.$inferSelect;
+export type InsertNotificacao = typeof notificacoes.$inferInsert;

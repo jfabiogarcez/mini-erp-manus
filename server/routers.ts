@@ -156,6 +156,7 @@ export const appRouter = router({
       .input(
         z.object({
           id: z.number(),
+          data: z.date().optional(),
           cliente: z.string().optional(),
           motorista: z.string().optional(),
           status: z.enum(["Agendada", "Em Andamento", "Concluída", "Cancelada"]).optional(),
