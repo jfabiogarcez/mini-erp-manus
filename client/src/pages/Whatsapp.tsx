@@ -243,6 +243,12 @@ export default function Whatsapp() {
           <p className="text-sm text-muted-foreground mt-1">Gerenciar conversas, templates e documentos</p>
         </div>
         <div className="flex gap-2">
+          <Link href="/whatsapp-chat">
+            <Button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white">
+              <MessageCircle className="w-4 h-4" />
+              Abrir Chat
+            </Button>
+          </Link>
           <Button variant="outline" className="flex items-center gap-2" onClick={() => window.location.href = '/whatsapp-analytics'}>
             <BarChart3 className="w-4 h-4" />
             Analytics

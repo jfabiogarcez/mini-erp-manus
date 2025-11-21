@@ -690,3 +690,10 @@
 - [x] WebSocket para atualizacao em tempo real
 - [x] Link no Dashboard para acesso rápido
 - [x] Layout responsivo tipo WhatsApp real
+
+
+## Adicionar Botao de Acesso ao Chat
+
+- [x] Adicionar botao visivel na pagina antiga de WhatsApp (/whatsapp)
+- [x] Botao deve redirecionar para /whatsapp-chat
+- [ ] Criar checkpoint final
