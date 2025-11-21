@@ -468,3 +468,15 @@
 - [x] Implementar filtros por período (mês, trimestre, ano)
 - [ ] Adicionar exportação de gráficos
 - [ ] Criar visualização de comparação mês a mês
+
+### 19. Integração Twilio + ChatGPT para WhatsApp
+- [ ] Adicionar credenciais Twilio via Secrets
+- [ ] Adicionar credenciais ChatGPT via Secrets
+- [ ] Instalar bibliotecas twilio e openai
+- [ ] Criar schema de conversas WhatsApp no banco
+- [ ] Implementar webhook para receber mensagens Twilio
+- [ ] Integrar ChatGPT para processar mensagens
+- [ ] Criar sistema de memória com Manus
+- [ ] Implementar envio de mensagens via Twilio
+- [ ] Criar interface para gerenciar conversas
+- [ ] Testar chatbot end-to-end
