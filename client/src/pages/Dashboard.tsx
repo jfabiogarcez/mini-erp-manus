@@ -268,6 +268,10 @@ export default function Dashboard() {
             </svg>
             Métricas e KPIs
           </Link>
+          <Link href="/whatsapp" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+            <MessageCircle className="h-5 w-5" />
+            WhatsApp
+          </Link>
           <div className="space-y-1">
             <Link href="/equipe" className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
               <div className="flex items-center gap-3">
