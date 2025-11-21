@@ -697,3 +697,13 @@
 - [x] Adicionar botao visivel na pagina antiga de WhatsApp (/whatsapp)
 - [x] Botao deve redirecionar para /whatsapp-chat
 - [ ] Criar checkpoint final
+
+
+## Debug Integracao Twilio - Mensagens Nao Chegando
+
+- [x] Verificar se webhook esta registrado no console do Twilio
+- [x] Documentar URL publica do webhook
+- [x] Testar credenciais do Twilio
+- [x] Criar script de teste de envio de mensagem
+- [x] Criar guia passo a passo para configurar webhook
+- [ ] Criar checkpoint final
