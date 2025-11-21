@@ -228,10 +228,7 @@ export default function Dashboard() {
             <Bell className="h-5 w-5" />
             Tarefas
           </a>
-          <a href="#whatsapp" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
-            <MessageCircle className="h-5 w-5" />
-            WhatsApp
-          </a>
+
           <a href="#email" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
             <Mail className="h-5 w-5" />
             E-mail

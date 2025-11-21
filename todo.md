@@ -493,14 +493,19 @@
 - [x] Implementar upload de documentos
 
 ### Fase 4: Webhook e Integração Twilio
-- [ ] Registrar webhook com Twilio
-- [ ] Implementar recebimento de mensagens
-- [ ] Salvar mensagens no banco de dados
-- [ ] Integrar com ChatGPT para respostas automáticas
+- [x] Registrar webhook com Twilio
+- [x] Implementar recebimento de mensagens
+- [x] Salvar mensagens no banco de dados
+- [x] Integrar com ChatGPT para respostas automáticas
 
-### Fase 5: Testes e Checkpoint
-- [x] Testar exibição de conversas
-- [x] Testar CRUD de templates
-- [x] Testar upload de documentos
-- [ ] Testar recebimento de mensagens
+### Fase 5: Menu Numerado (1-5)
+- [x] Implementar menu numerado com 5 opções
+- [x] Adicionar respostas para cada opção
+- [x] Integrar com endpoints tRPC
+- [x] Criar testes para menu numerado
+
+### Fase 6: Correções e Checkpoint
+- [x] Remover aba duplicada de WhatsApp
+- [x] Consertar erro 404 na página de WhatsApp
+- [x] Adicionar rota /whatsapp no App.tsx
 - [ ] Criar checkpoint final

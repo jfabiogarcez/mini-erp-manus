@@ -14,6 +14,7 @@ import Modelos from "./pages/Modelos";
 import Missoes from "./pages/Missoes";
 import Relatorios from "./pages/Relatorios";
 import Metricas from "./pages/Metricas";
+import Whatsapp from "./pages/Whatsapp";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -29,6 +30,7 @@ function Router() {
       <Route path={"/relatorios"} component={Relatorios} />
       <Route path={"/metricas"} component={Metricas} />
       <Route path={"/dashboard"} component={Dashboard} />
+      <Route path={"/whatsapp"} component={Whatsapp} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

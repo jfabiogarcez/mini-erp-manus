@@ -888,6 +888,44 @@ Retorne em formato markdown.
       }),
   }),
   whatsapp: router({
+    // ========== WEBHOOK ==========
+    webhook: router({
+      processar: publicProcedure
+        .input(
+          z.object({
+            numeroCliente: z.string(),
+            mensagem: z.string(),
+            nomeCliente: z.string().optional(),
+          })
+        )
+        .mutation(async ({ input }) => {
+          const { processarMensagemWhatsapp } = await import("./whatsappWebhook");
+          return processarMensagemWhatsapp(
+            input.numeroCliente,
+            input.mensagem,
+            input.nomeCliente
+          );
+        }),
+      gerarMenu: publicProcedure.query(async () => {
+        const { gerarMenuNumerado } = await import("./whatsappWebhook");
+        return { menu: gerarMenuNumerado() };
+      }),
+      processarSelecao: publicProcedure
+        .input(z.object({ opcao: z.string() }))
+        .query(async ({ input }) => {
+          const { processarSelecaoMenu, ehSelecaoMenu } = await import(
+            "./whatsappWebhook"
+          );
+          if (!ehSelecaoMenu(input.opcao)) {
+            return {
+              valido: false,
+              resposta: "Opcao invalida. Digite um numero de 1 a 5.",
+            };
+          }
+          const resposta = await processarSelecaoMenu(input.opcao);
+          return { valido: true, resposta };
+        }),
+    }),
     // ========== CONVERSAS ==========
     conversas: router({
       list: publicProcedure.query(async () => {
