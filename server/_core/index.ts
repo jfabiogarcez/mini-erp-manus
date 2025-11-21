@@ -28,6 +28,14 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  // Iniciar processador de fila de mensagens
+  const { iniciarProcessadorFila } = await import("../queueMemory");
+  try {
+    await iniciarProcessadorFila();
+  } catch (error) {
+    console.warn("[Queue] Aviso: Não foi possível iniciar fila", error);
+  }
+
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
@@ -78,7 +86,20 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    console.log(`[Twilio] Webhook disponível em: http://localhost:${port}/api/whatsapp/webhook`);
   });
 }
 
 startServer().catch(console.error);
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("[Server] SIGTERM recebido, encerrando...");
+  const { pararProcessadorFila } = await import("../queueMemory");
+  try {
+    await pararProcessadorFila();
+  } catch (error) {
+    console.error("[Queue] Erro ao parar fila:", error);
+  }
+  process.exit(0);
+});

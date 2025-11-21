@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { adicionarMensagemAFila } from "./queueMemory";
 import { processarMensagemWhatsapp, gerarMenuNumerado, processarSelecaoMenu, ehSelecaoMenu } from "./whatsappWebhook";
 import { getDb } from "./db";
 import { conversasWhatsapp, mensagensWhatsapp } from "../drizzle/schema";
@@ -47,23 +48,17 @@ export async function processarWebhookTwilio(body: Record<string, any>) {
 
     console.log(`[Twilio] Mensagem recebida de ${numeroWhatsApp}: ${mensagem}`);
 
-    // 1. Processar mensagem
-    let resposta = "";
+    // 1. Adicionar mensagem a fila para processamento assincrono
+    await adicionarMensagemAFila({
+      numeroCliente: numeroWhatsApp,
+      mensagem,
+      twilioMessageSid: body.MessageSid,
+    });
 
-    // Verificar se é seleção do menu
-    if (ehSelecaoMenu(mensagem)) {
-      resposta = await processarSelecaoMenu(mensagem);
-    } else {
-      // Processar como mensagem normal com IA
-      const resultado = await processarMensagemWhatsapp(
-        numeroWhatsApp,
-        mensagem
-      );
-      resposta = resultado.resposta;
-    }
-
-    // 2. Retornar resposta no formato Twilio
-    return gerarRespostaTwilio(resposta);
+    // 2. Retornar resposta imediata (confirmar recebimento)
+    return gerarRespostaTwilio(
+      "Mensagem recebida! Vou processar em breve."
+    );
   } catch (error) {
     console.error("Erro ao processar webhook Twilio:", error);
     return gerarRespostaTwilio(
@@ -136,21 +131,27 @@ export async function obterHistoricoConversa(
 
 /**
  * Envia mensagem para cliente via Twilio (para respostas assíncronas)
- * Requer Twilio SDK configurado
  */
 export async function enviarMensagemTwilio(
   numeroCliente: string,
   mensagem: string
 ): Promise<boolean> {
   try {
-    // TODO: Implementar com Twilio SDK
-    // const client = twilio(accountSid, authToken);
-    // await client.messages.create({
-    //   from: 'whatsapp:+5511987654321',
-    //   to: `whatsapp:${numeroCliente}`,
-    //   body: mensagem,
-    // });
-    console.log(`[Twilio] Enviando para ${numeroCliente}: ${mensagem}`);
+    const twilio = await import("twilio");
+    const client = twilio.default(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN
+    );
+
+    const phoneNumber = process.env.TWILIO_PHONE_NUMBER || "+5511972632473";
+
+    await client.messages.create({
+      from: `whatsapp:${phoneNumber}`,
+      to: `whatsapp:${numeroCliente}`,
+      body: mensagem,
+    });
+
+    console.log(`[Twilio] Mensagem enviada para ${numeroCliente}`);
     return true;
   } catch (error) {
     console.error("Erro ao enviar mensagem Twilio:", error);
