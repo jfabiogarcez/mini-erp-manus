@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -390,68 +390,105 @@ export default function Multas() {
         </TabsList>
 
         <TabsContent value={filterStatus} className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {multasFiltradas.map((multa) => (
-              <Card key={multa.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
-                        <AlertCircle className="h-6 w-6 text-red-600" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{multa.numeroAuto || "Sem número"}</CardTitle>
-                        <CardDescription>{multa.veiculoPlaca || "Sem placa"}</CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => handleEdit(multa)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => handleDelete(multa.id)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(multa.status)}`}>
-                    {multa.status}
-                  </div>
-                  {multa.descricaoInfracao && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <FileText className="h-4 w-4" />
-                      {multa.descricaoInfracao}
-                    </div>
-                  )}
-                  {multa.valor !== null && multa.valor > 0 && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <DollarSign className="h-4 w-4" />
-                      R$ {multa.valor.toFixed(2)}
-                    </div>
-                  )}
-                  {multa.dataVencimento && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="h-4 w-4" />
-                      Vence em: {new Date(multa.dataVencimento).toLocaleDateString('pt-BR')}
-                    </div>
-                  )}
-                  {multa.pontos !== null && multa.pontos > 0 && (
-                    <div className="text-gray-600">
-                      {multa.pontos} pontos na CNH
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          {multasFiltradas.length === 0 && (
-            <Card>
-              <CardContent className="py-12 text-center text-gray-500">
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {multasFiltradas.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Número do Auto</TableHead>
+                      <TableHead>Placa</TableHead>
+                      <TableHead>Infração</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Pontos</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {multasFiltradas.map((multa) => (
+                      <TableRow key={multa.id}>
+                        <TableCell className="font-medium">
+                          {multa.numeroAuto || "-"}
+                        </TableCell>
+                        <TableCell>{multa.veiculoPlaca || "-"}</TableCell>
+                        <TableCell className="max-w-xs">
+                          {multa.descricaoInfracao ? (
+                            <div>
+                              <div className="font-medium">{multa.codigoInfracao || ""}</div>
+                              <div className="text-sm text-gray-500 truncate">{multa.descricaoInfracao}</div>
+                            </div>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {multa.dataInfracao
+                            ? new Date(multa.dataInfracao).toLocaleDateString("pt-BR")
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {multa.dataVencimento ? (
+                            <div>
+                              {new Date(multa.dataVencimento).toLocaleDateString("pt-BR")}
+                              {new Date(multa.dataVencimento) < new Date() && multa.status === "Pendente" && (
+                                <div className="text-xs text-red-600 font-medium">Vencida</div>
+                              )}
+                            </div>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {multa.valor !== null && multa.valor > 0
+                            ? `R$ ${multa.valor.toFixed(2)}`
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {multa.pontos !== null && multa.pontos > 0
+                            ? `${multa.pontos} pts`
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                              multa.status
+                            )}`}
+                          >
+                            {multa.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(multa)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(multa.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-500">
                 Nenhuma multa cadastrada
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

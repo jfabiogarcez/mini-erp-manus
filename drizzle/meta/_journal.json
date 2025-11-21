@@ -71,6 +71,13 @@
       "when": 1763658117880,
       "tag": "0009_strong_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1763732842506,
+      "tag": "0010_flawless_marauders",
+      "breakpoints": true
     }
   ]
 }

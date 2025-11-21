@@ -30,11 +30,21 @@ export type InsertUser = typeof users.$inferInsert;
 export const missoes = mysqlTable("missoes", {
   id: int("id").autoincrement().primaryKey(),
   codigoMissao: varchar("codigoMissao", { length: 50 }).notNull().unique(),
+  data: timestamp("data").notNull(), // Data da missão
   cliente: text("cliente"),
+  servico: varchar("servico", { length: 255 }), // Tipo de serviço
+  origem: text("origem"), // Local de origem
+  destino: text("destino"), // Local de destino
   motorista: text("motorista"),
-  status: mysqlEnum("status", ["Pendente", "Em Andamento", "Concluída", "Cancelada"]).default("Pendente").notNull(),
+  motoristaId: int("motorista_id"), // FK para membrosEquipe
+  veiculo: varchar("veiculo", { length: 100 }), // Veículo utilizado
+  veiculoPlaca: varchar("veiculo_placa", { length: 20 }),
+  valor: int("valor").default(0), // Valor em centavos
+  status: mysqlEnum("status", ["Agendada", "Em Andamento", "Concluída", "Cancelada"]).default("Agendada").notNull(),
   dataInicio: timestamp("dataInicio"),
   dataFim: timestamp("dataFim"),
+  horaInicio: varchar("horaInicio", { length: 10 }), // HH:MM
+  horaFim: varchar("horaFim", { length: 10 }), // HH:MM
   observacoes: text("observacoes"),
   linkGoogleDrive: text("linkGoogleDrive"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

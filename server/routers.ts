@@ -128,10 +128,23 @@ export const appRouter = router({
     create: publicProcedure
       .input(
         z.object({
+          data: z.date(),
           cliente: z.string().optional(),
+          servico: z.string().optional(),
+          origem: z.string().optional(),
+          destino: z.string().optional(),
           motorista: z.string().optional(),
+          motoristaId: z.number().optional(),
+          veiculo: z.string().optional(),
+          veiculoPlaca: z.string().optional(),
+          valor: z.number().optional(),
+          status: z.enum(["Agendada", "Em Andamento", "Concluída", "Cancelada"]).optional(),
           dataInicio: z.date().optional(),
+          dataFim: z.date().optional(),
+          horaInicio: z.string().optional(),
+          horaFim: z.string().optional(),
           observacoes: z.string().optional(),
+          linkGoogleDrive: z.string().optional(),
         })
       )
       .mutation(async ({ input }) => {
@@ -145,7 +158,7 @@ export const appRouter = router({
           id: z.number(),
           cliente: z.string().optional(),
           motorista: z.string().optional(),
-          status: z.enum(["Pendente", "Em Andamento", "Concluída", "Cancelada"]).optional(),
+          status: z.enum(["Agendada", "Em Andamento", "Concluída", "Cancelada"]).optional(),
           dataFim: z.date().optional(),
           observacoes: z.string().optional(),
           linkGoogleDrive: z.string().optional(),
@@ -166,6 +179,56 @@ export const appRouter = router({
       const { getArquivosByMissaoId } = await import("./db");
       return getArquivosByMissaoId(input.missaoId);
     }),
+    importFromFile: publicProcedure
+      .input(
+        z.object({
+          fileUrl: z.string(),
+          fileType: z.enum(["excel", "pdf"]),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { createMissao } = await import("./db");
+        const { extrairMissoesDePDF, normalizeMissoesFromExcel } = await import("./fileProcessor");
+        const XLSX = await import("xlsx");
+        
+        let missoes: any[] = [];
+        
+        if (input.fileType === "pdf") {
+          // Extrair missões de PDF usando IA
+          missoes = await extrairMissoesDePDF(input.fileUrl);
+        } else if (input.fileType === "excel") {
+          // Baixar e processar Excel
+          const response = await fetch(input.fileUrl);
+          const buffer = Buffer.from(await response.arrayBuffer());
+          const workbook = XLSX.read(buffer, { type: 'buffer' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const data = XLSX.utils.sheet_to_json(worksheet);
+          missoes = normalizeMissoesFromExcel(data);
+        }
+        
+        // Criar missões no banco de dados
+        const created: number[] = [];
+        for (const missao of missoes) {
+          try {
+            // Converter data string para Date
+            if (typeof missao.data === 'string') {
+              missao.data = new Date(missao.data);
+            }
+            const id = await createMissao(missao);
+            created.push(id);
+          } catch (error) {
+            console.error('Erro ao criar missão:', error);
+          }
+        }
+        
+        return { 
+          success: true, 
+          imported: created.length,
+          total: missoes.length,
+          ids: created
+        };
+      }),
   }),
   tarefas: router({
     list: publicProcedure.query(async () => {

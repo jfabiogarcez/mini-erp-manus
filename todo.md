@@ -351,3 +351,43 @@
 - [x] Implementar seleção de destinatário para envio
 - [x] Adicionar envio automático por e-mail/WhatsApp
 - [x] Criar histórico de documentos gerados
+
+### 7. Correções
+- [ ] Adicionar botão visível de "Upload PDFs" na página de Multas
+- [ ] Verificar se o upload múltiplo está funcionando corretamente
+
+### 8. Aba de Missões
+- [ ] Criar tabela de missões no banco de dados
+- [ ] Implementar CRUD de missões (criar, editar, excluir, listar)
+- [ ] Criar página de Missões com tabela baseada no modelo fornecido
+- [ ] Adicionar campos: data, cliente, serviço, motorista, veículo, valor, status, etc.
+- [ ] Implementar filtros e busca na tabela de missões
+- [ ] Adicionar link no menu lateral para Missões
+
+### 9. Calendário Integrado no Dashboard
+- [ ] Instalar biblioteca de calendário (FullCalendar ou similar)
+- [ ] Criar componente de calendário no Dashboard
+- [ ] Integrar missões no calendário
+- [ ] Integrar multas com data de vencimento no calendário
+- [ ] Criar sincronização automática: upload de multas → calendário
+- [ ] Adicionar cores diferentes para missões e multas
+- [ ] Implementar visualização mensal/semanal/diária
+- [ ] Adicionar tooltips com detalhes ao passar mouse nos eventos
+
+### 10. Padronização de Visualização
+- [x] Converter página de Multas para visualização em tabela (linhas)
+- [ ] Converter página de Equipe para visualização em tabela (linhas)
+- [ ] Converter página de Aprendizados para visualização em tabela (linhas)
+- [ ] Converter página de Modelos para visualização em tabela (linhas)
+- [ ] Garantir que todas as páginas usem tabelas ao invés de cards
+
+### 11. Upload de Arquivos (Excel e PDF com OCR)
+- [x] Adicionar botão de upload em Missões
+- [x] Implementar processamento de Excel para Missões
+- [x] Implementar extração de PDF com OCR para Missões
+- [ ] Adicionar botão de upload em Equipe
+- [ ] Implementar processamento de Excel para Equipe
+- [ ] Adicionar botão de upload em Registros
+- [ ] Implementar processamento de Excel/PDF para Registros
+- [ ] Criar endpoint genérico de processamento de arquivos
+- [ ] Adicionar validação e feedback de progresso

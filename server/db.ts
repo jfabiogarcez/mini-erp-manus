@@ -710,3 +710,28 @@ export async function updateDocumentoGerado(id: number, data: any) {
   const { documentosGerados } = await import("../drizzle/schema");
   await db.update(documentosGerados).set(data).where(eq(documentosGerados.id, id));
 }
+
+// ===== Funções Adicionais de Missões =====
+
+export async function getMissoesByStatus(status: "Agendada" | "Em Andamento" | "Concluída" | "Cancelada") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { missoes } = await import("../drizzle/schema");
+  return db.select().from(missoes).where(eq(missoes.status, status)).orderBy(desc(missoes.data));
+}
+
+export async function getMissoesByDateRange(startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { missoes } = await import("../drizzle/schema");
+  const { and, gte, lte } = await import("drizzle-orm");
+  
+  return db.select().from(missoes)
+    .where(and(
+      gte(missoes.data, startDate),
+      lte(missoes.data, endDate)
+    ))
+    .orderBy(missoes.data);
+}
