@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import {
   MessageCircle,
@@ -230,6 +231,10 @@ export default function Whatsapp() {
           <p className="text-sm text-muted-foreground mt-1">Gerenciar conversas, templates e documentos</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" className="flex items-center gap-2" onClick={() => window.location.href = '/whatsapp-analytics'}>
+            <BarChart3 className="w-4 h-4" />
+            Analytics
+          </Button>
           <Badge variant="outline" className="flex items-center gap-1">
             <CheckCircle className="w-4 h-4 text-green-500" />
             Conectado

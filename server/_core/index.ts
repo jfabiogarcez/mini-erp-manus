@@ -38,6 +38,19 @@ async function startServer() {
   // Webhook para integração com Manus
   const webhookRouter = await import("../webhook");
   app.use("/api/webhook", webhookRouter.default);
+  // Webhook para Twilio WhatsApp
+  app.post("/api/whatsapp/webhook", express.urlencoded({ extended: false }), async (req, res) => {
+    try {
+      const { processarWebhookTwilio } = await import("../whatsappTwilio");
+      const resposta = await processarWebhookTwilio(req.body);
+      res.type("text/xml");
+      res.send(resposta);
+    } catch (error) {
+      console.error("Erro no webhook Twilio:", error);
+      res.type("text/xml");
+      res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Message>Erro ao processar mensagem</Message></Response>`);
+    }
+  });
   // Upload de arquivos
   const uploadRouter = await import("../upload");
   app.use("/api", uploadRouter.default);

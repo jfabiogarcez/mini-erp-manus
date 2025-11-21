@@ -89,6 +89,15 @@ async function gerarRespostaIA(numeroCliente: string, mensagemCliente: string): 
   if (!db) throw new Error("Database not available");
 
   try {
+    // Buscar historico de conversa
+    const { obterHistoricoConversa } = await import("./whatsappTwilio");
+    const historico = await obterHistoricoConversa(numeroCliente, 5);
+    
+    // Formatar historico para contexto
+    const historicoFormatado = historico
+      .map((m: any) => `${m.remetente}: ${m.mensagem}`)
+      .join("\n");
+
     // Buscar documentos para contexto
     const documentos = await db.select().from(conversasWhatsapp).limit(5);
 
@@ -99,12 +108,16 @@ async function gerarRespostaIA(numeroCliente: string, mensagemCliente: string): 
 
     const systemPrompt = `Você é um assistente de atendimento ao cliente da Transblindados, especializada em serviços de transporte executivo, segurança pessoal e receptivo de aeroporto.
 
+Histórico da conversa:
+${historicoFormatado || "Primeira mensagem do cliente"}
+
 Instruções:
 1. Sempre responda em português brasileiro
 2. Seja profissional, cortês e prestativo
 3. Se o cliente solicitar um serviço específico, ofereça as opções disponíveis
 4. Para orçamentos, solicite informações como: data, horário, origem e destino
 5. Sempre termine com uma pergunta para manter o diálogo
+6. Use o contexto do histórico para manter consistência
 
 Contexto dos serviços e documentos:
 ${contexto || "Serviços: Transporte Executivo, Segurança Pessoal, Receptivo de Aeroporto"}

@@ -509,3 +509,31 @@
 - [x] Consertar erro 404 na página de WhatsApp
 - [x] Adicionar rota /whatsapp no App.tsx
 - [ ] Criar checkpoint final
+
+
+## Integração Real de WhatsApp com Twilio
+
+### Fase 1: Webhook HTTP Real
+- [x] Criar endpoint HTTP POST /api/whatsapp/webhook
+- [x] Validar assinatura do Twilio
+- [x] Processar mensagens recebidas
+- [x] Enviar respostas de volta para Twilio
+
+### Fase 2: Persistência de Contexto
+- [x] Salvar histórico completo de conversas
+- [x] Implementar busca de contexto anterior
+- [x] Passar contexto para ChatGPT
+- [x] Manter conversas com múltiplas mensagens
+
+### Fase 3: Dashboard de Analytics
+- [x] Criar página de analytics
+- [x] Gráfico de volume de mensagens
+- [x] Gráfico de opções selecionadas
+- [x] Gráfico de taxa de conversão
+- [x] Métricas de tempo de resposta
+
+### Fase 4: Testes e Integração
+- [x] Testar webhook com Twilio
+- [x] Testar recebimento de mensagens
+- [x] Testar respostas automáticas
+- [x] Criar checkpoint final
