@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import SyncDashboard from "./pages/SyncDashboard";
+import MicrosoftLogin from "./pages/MicrosoftLogin";
 import { RealtimeNotifications } from "./components/RealtimeNotifications";
 
 function Router() {
@@ -14,6 +15,7 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/sync-dashboard"} component={SyncDashboard} />
+      <Route path={"/microsoft-login"} component={MicrosoftLogin} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
