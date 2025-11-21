@@ -602,3 +602,36 @@
 - [x] Testar atualização de status
 - [x] Testar WebSocket
 - [x] Criar checkpoint final
+
+
+## WebSocket para Atualização em Tempo Real
+
+### Fase 1: Servidor WebSocket
+- [x] Instalar Socket.io
+- [x] Configurar Socket.io no servidor Express
+- [x] Criar eventos de atualização de status
+- [x] Implementar broadcast de mensagens
+
+### Fase 2: Eventos de Status
+- [x] Evento: mensagem.criada
+- [x] Evento: mensagem.statusAtualizado
+- [x] Evento: conversa.atualizada
+- [x] Emitir eventos ao atualizar status
+
+### Fase 3: Cliente WebSocket
+- [x] Instalar socket.io-client
+- [x] Criar hook useWebSocket
+- [x] Conectar ao servidor WebSocket
+- [x] Escutar eventos de atualização
+
+### Fase 4: Integração
+- [x] Atualizar estado local ao receber evento
+- [x] Revalidar queries tRPC
+- [x] Animar transições de status
+- [x] Testar com múltiplos clientes
+
+### Fase 5: Testes
+- [x] Testar conexão WebSocket
+- [x] Testar atualização de status
+- [x] Testar com múltiplas abas
+- [x] Criar checkpoint final

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import {
@@ -36,6 +36,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge, StatusTableCell, SendingProgress } from "@/components/StatusBadge";
+import { useStatusUpdates } from "@/hooks/useWebSocket";
 
 export default function Whatsapp() {
   const [activeTab, setActiveTab] = useState("conversas");
@@ -62,6 +63,7 @@ export default function Whatsapp() {
     onSuccess: () => {
       toast.success("Conversa deletada com sucesso!");
       refetchConversas();
+      refetchMensagens();
     },
     onError: () => {
       toast.error("Erro ao deletar conversa");
@@ -71,6 +73,13 @@ export default function Whatsapp() {
   // ========== MENSAGENS ==========
   const { data: allMensagens = [], refetch: refetchMensagens } = 
     trpc.whatsapp.mensagens.list.useQuery();
+
+  // WebSocket para atualizar status de mensagens em tempo real
+  useStatusUpdates((update) => {
+    console.log("[Whatsapp] Status atualizado:", update);
+    // Revalidar mensagens para atualizar a UI
+    refetchMensagens();
+  });
 
   // ========== TEMPLATES ==========
   const { data: templates = [], isLoading: loadingTemplates, refetch: refetchTemplates } = 
@@ -82,6 +91,7 @@ export default function Whatsapp() {
       setTemplateForm({ titulo: "", conteudo: "", variaveis: "", categoria: "geral" });
       setIsDialogOpen(false);
       refetchTemplates();
+      refetchMensagens();
     },
     onError: () => {
       toast.error("Erro ao criar template");
@@ -95,6 +105,7 @@ export default function Whatsapp() {
       setEditingTemplate(null);
       setIsDialogOpen(false);
       refetchTemplates();
+      refetchMensagens();
     },
     onError: () => {
       toast.error("Erro ao atualizar template");

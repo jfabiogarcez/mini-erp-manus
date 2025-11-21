@@ -5,6 +5,7 @@
 
 import { processarMensagemWhatsapp, processarSelecaoMenu, ehSelecaoMenu } from "./whatsappWebhook";
 import { enviarMensagemTwilio } from "./whatsappTwilio";
+import { emitMensagemStatusUpdate } from "./websocket";
 
 export interface MensagemJob {
   numeroCliente: string;

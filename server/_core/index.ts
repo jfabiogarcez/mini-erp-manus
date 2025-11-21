@@ -38,6 +38,10 @@ async function startServer() {
 
   const app = express();
   const server = createServer(app);
+
+  // Inicializar WebSocket
+  const { initializeWebSocket } = await import("../websocket");
+  initializeWebSocket(server);
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -87,10 +91,14 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
     console.log(`[Twilio] Webhook disponível em: http://localhost:${port}/api/whatsapp/webhook`);
+    console.log(`[WebSocket] Disponível em: ws://localhost:${port}`);
   });
 }
 
 startServer().catch(console.error);
+
+// Exportar funções para uso em outros módulos
+export { emitMensagemStatusUpdate, emitMensagemCriada, emitConversaUpdate } from "../websocket";
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {
@@ -100,6 +108,12 @@ process.on("SIGTERM", async () => {
     await pararProcessadorFila();
   } catch (error) {
     console.error("[Queue] Erro ao parar fila:", error);
+  }
+  const { getIO } = await import("../websocket");
+  const io = getIO();
+  if (io) {
+    io.close();
+    console.log("[WebSocket] Fechado");
   }
   process.exit(0);
 });
