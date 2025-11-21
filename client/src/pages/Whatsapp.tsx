@@ -35,6 +35,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge, StatusTableCell, SendingProgress } from "@/components/StatusBadge";
 
 export default function Whatsapp() {
   const [activeTab, setActiveTab] = useState("conversas");

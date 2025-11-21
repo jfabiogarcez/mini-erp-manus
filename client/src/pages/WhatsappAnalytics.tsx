@@ -4,6 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { MessageCircle, Users, TrendingUp, Clock } from "lucide-react";
+import { ResumoStatusMensagens } from "@/components/MensagensComStatus";
+import { StatusBadge } from "@/components/StatusBadge";
+
 
 export default function WhatsappAnalytics() {
   const { data: conversas } = trpc.whatsapp.conversas.list.useQuery();
@@ -140,10 +143,11 @@ export default function WhatsappAnalytics() {
 
         {/* Gráficos */}
         <Tabs defaultValue="volume" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="volume">Volume por Dia</TabsTrigger>
             <TabsTrigger value="opcoes">Opções Selecionadas</TabsTrigger>
             <TabsTrigger value="status">Status das Conversas</TabsTrigger>
+            <TabsTrigger value="envio">Status de Envio</TabsTrigger>
           </TabsList>
 
           <TabsContent value="volume">
@@ -212,6 +216,41 @@ export default function WhatsappAnalytics() {
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TAB: STATUS DE ENVIO */}
+          <TabsContent value="envio" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Resumo de Status de Envio</CardTitle>
+                <CardDescription>Distribuição de mensagens por status</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {mensagens && <ResumoStatusMensagens mensagens={mensagens} />}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Últimas Mensagens com Status</CardTitle>
+                <CardDescription>Visualize o status de envio em tempo real</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {mensagens && mensagens.slice(0, 10).map((msg: any) => (
+                    <div key={msg.id} className="flex items-center justify-between p-2 border rounded">
+                      <div className="flex-1">
+                        <p className="text-sm truncate">{msg.mensagem}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(msg.dataEnvio).toLocaleString("pt-BR")}
+                        </p>
+                      </div>
+                      <StatusBadge status={msg.statusEnvio || "Pendente"} size="sm" />
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

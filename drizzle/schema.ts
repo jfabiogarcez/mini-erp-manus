@@ -428,6 +428,7 @@ export const mensagensWhatsapp = mysqlTable("mensagensWhatsapp", {
   tipo: mysqlEnum("tipo", ["Texto", "Imagem", "Documento", "Áudio", "Vídeo"]).default("Texto").notNull(),
   anexoUrl: text("anexoUrl"), // URL do arquivo anexado
   dataEnvio: timestamp("dataEnvio").notNull(),
+  statusEnvio: mysqlEnum("statusEnvio", ["Pendente", "Processando", "Enviado", "Falhou"]).default("Pendente").notNull(),
   lida: int("lida").default(0).notNull(), // Boolean (0 ou 1)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

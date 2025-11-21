@@ -574,3 +574,31 @@
 - Redis não disponível no sandbox → Implementado fila em memória
 - Credenciais Twilio necessárias → Solicitadas ao usuário
 - Erro ao enviar via Twilio → Será resolvido com credenciais reais
+
+
+## Indicador Visual de Status em Tempo Real
+
+### Fase 1: Schema do Banco
+- [x] Adicionar coluna `statusEnvio` na tabela mensagensWhatsapp
+- [x] Adicionar coluna `statusConversa` com enum (Ativa, Arquivada, Bloqueada)
+- [x] Migrar schema com pnpm db:push
+
+### Fase 2: WebSocket
+- [x] Implementar WebSocket para atualizações em tempo real
+- [x] Criar evento de atualização de status
+- [x] Sincronizar status entre servidor e cliente
+
+### Fase 3: Componente Visual
+- [x] Criar componente StatusBadge com cores (Pendente, Processando, Enviado, Falhou)
+- [x] Adicionar ícones com animações
+- [x] Implementar tooltips com detalhes
+
+### Fase 4: Integração
+- [x] Adicionar indicadores na página de WhatsApp
+- [x] Adicionar indicadores no dashboard de analytics
+- [x] Atualizar em tempo real via WebSocket
+
+### Fase 5: Testes
+- [x] Testar atualização de status
+- [x] Testar WebSocket
+- [x] Criar checkpoint final
