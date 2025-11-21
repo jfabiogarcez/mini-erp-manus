@@ -405,3 +405,15 @@
 - [x] Implementar download de PDF
 - [ ] Adicionar opção de envio de relatório por e-mail
 - [x] Criar histórico de relatórios gerados
+
+### 13. Calendário Visual Interativo
+- [x] Instalar biblioteca de calendário (react-big-calendar ou similar)
+- [x] Criar componente de calendário base
+- [x] Integrar dados de missões no calendário
+- [x] Integrar dados de multas no calendário
+- [x] Adicionar cores diferentes para missões (azul) e multas (vermelho)
+- [x] Implementar modal de detalhes ao clicar em evento
+- [x] Adicionar navegação entre meses (anterior/próximo)
+- [x] Implementar filtros para mostrar/ocultar missões ou multas
+- [x] Adicionar visualização de mês e semana
+- [x] Testar interatividade e responsividade
