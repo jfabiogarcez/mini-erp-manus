@@ -735,3 +735,215 @@ export async function getMissoesByDateRange(startDate: Date, endDate: Date) {
     ))
     .orderBy(missoes.data);
 }
+
+// ===== Funções de Relatórios =====
+
+/**
+ * Agrega dados de missões para um mês específico
+ */
+export async function agregarDadosMissoesMensal(mes: number, ano: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { missoes } = await import("../drizzle/schema");
+  const { and, gte, lte, sql } = await import("drizzle-orm");
+  
+  // Calcular primeiro e último dia do mês
+  const primeiroDia = new Date(ano, mes - 1, 1);
+  const ultimoDia = new Date(ano, mes, 0, 23, 59, 59);
+  
+  // Buscar todas as missões do mês
+  const missoesMes = await db.select().from(missoes)
+    .where(and(
+      gte(missoes.data, primeiroDia),
+      lte(missoes.data, ultimoDia)
+    ));
+  
+  // Calcular estatísticas
+  const total = missoesMes.length;
+  const porStatus = {
+    Agendada: missoesMes.filter(m => m.status === "Agendada").length,
+    "Em Andamento": missoesMes.filter(m => m.status === "Em Andamento").length,
+    Concluída: missoesMes.filter(m => m.status === "Concluída").length,
+    Cancelada: missoesMes.filter(m => m.status === "Cancelada").length,
+  };
+  
+  const receitaTotal = missoesMes.reduce((sum, m) => sum + (m.valor || 0), 0);
+  
+  // Ranking de motoristas
+  const missoesPorMotorista: Record<string, number> = {};
+  missoesMes.forEach(m => {
+    if (m.motorista) {
+      missoesPorMotorista[m.motorista] = (missoesPorMotorista[m.motorista] || 0) + 1;
+    }
+  });
+  
+  const rankingMotoristas = Object.entries(missoesPorMotorista)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([motorista, total]) => ({ motorista, total }));
+  
+  // Serviços mais solicitados
+  const missoesPorServico: Record<string, number> = {};
+  missoesMes.forEach(m => {
+    if (m.servico) {
+      missoesPorServico[m.servico] = (missoesPorServico[m.servico] || 0) + 1;
+    }
+  });
+  
+  const servicosMaisSolicitados = Object.entries(missoesPorServico)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([servico, total]) => ({ servico, total }));
+  
+  return {
+    periodo: { mes, ano },
+    total,
+    porStatus,
+    receitaTotal,
+    receitaMedia: total > 0 ? Math.round(receitaTotal / total) : 0,
+    rankingMotoristas,
+    servicosMaisSolicitados,
+    missoes: missoesMes,
+  };
+}
+
+/**
+ * Agrega dados de multas para um mês específico
+ */
+export async function agregarDadosMultasMensal(mes: number, ano: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { multas } = await import("../drizzle/schema");
+  const { and, gte, lte } = await import("drizzle-orm");
+  
+  // Calcular primeiro e último dia do mês
+  const primeiroDia = new Date(ano, mes - 1, 1);
+  const ultimoDia = new Date(ano, mes, 0, 23, 59, 59);
+  
+  // Buscar todas as multas do mês (pela data da infração)
+  const multasMes = await db.select().from(multas)
+    .where(and(
+      gte(multas.dataInfracao, primeiroDia),
+      lte(multas.dataInfracao, ultimoDia)
+    ));
+  
+  // Calcular estatísticas
+  const total = multasMes.length;
+  const porStatus = {
+    Pendente: multasMes.filter(m => m.status === "Pendente").length,
+    Pago: multasMes.filter(m => m.status === "Pago").length,
+    Recorrido: multasMes.filter(m => m.status === "Recorrido").length,
+    Cancelado: multasMes.filter(m => m.status === "Cancelado").length,
+  };
+  
+  const valorTotal = multasMes.reduce((sum, m) => sum + (m.valor || 0), 0);
+  const valorPago = multasMes
+    .filter(m => m.status === "Pago")
+    .reduce((sum, m) => sum + (m.valor || 0), 0);
+  const valorPendente = multasMes
+    .filter(m => m.status === "Pendente")
+    .reduce((sum, m) => sum + (m.valor || 0), 0);
+  
+  // Multas por veículo
+  const multasPorVeiculo: Record<string, { total: number; valor: number }> = {};
+  multasMes.forEach(m => {
+    if (m.veiculoPlaca) {
+      if (!multasPorVeiculo[m.veiculoPlaca]) {
+        multasPorVeiculo[m.veiculoPlaca] = { total: 0, valor: 0 };
+      }
+      multasPorVeiculo[m.veiculoPlaca].total++;
+      multasPorVeiculo[m.veiculoPlaca].valor += m.valor || 0;
+    }
+  });
+  
+  const rankingVeiculos = Object.entries(multasPorVeiculo)
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 10)
+    .map(([veiculo, dados]) => ({ veiculo, ...dados }));
+  
+  // Tipos de infração mais comuns (baseado na descrição)
+  const multasPorTipo: Record<string, number> = {};
+  multasMes.forEach(m => {
+    if (m.descricaoInfracao) {
+      multasPorTipo[m.descricaoInfracao] = (multasPorTipo[m.descricaoInfracao] || 0) + 1;
+    }
+  });
+  
+  const tiposMaisComuns = Object.entries(multasPorTipo)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([tipo, total]) => ({ tipo, total }));
+  
+  return {
+    periodo: { mes, ano },
+    total,
+    porStatus,
+    valorTotal,
+    valorPago,
+    valorPendente,
+    valorMedio: total > 0 ? Math.round(valorTotal / total) : 0,
+    rankingVeiculos,
+    tiposMaisComuns,
+    multas: multasMes,
+  };
+}
+
+/**
+ * Cria um novo relatório no banco de dados
+ */
+export async function createRelatorio(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { relatorios } = await import("../drizzle/schema");
+  const result = await db.insert(relatorios).values(data);
+  const insertId = (result as any).insertId;
+  return Number(insertId);
+}
+
+/**
+ * Busca todos os relatórios
+ */
+export async function getAllRelatorios() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { relatorios } = await import("../drizzle/schema");
+  return db.select().from(relatorios).orderBy(desc(relatorios.createdAt));
+}
+
+/**
+ * Busca relatórios por tipo
+ */
+export async function getRelatoriosByTipo(tipo: "Missões" | "Multas" | "Consolidado") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { relatorios } = await import("../drizzle/schema");
+  return db.select().from(relatorios)
+    .where(eq(relatorios.tipo, tipo))
+    .orderBy(desc(relatorios.ano), desc(relatorios.mes));
+}
+
+/**
+ * Busca relatório por mês/ano/tipo
+ */
+export async function getRelatorioByPeriodo(mes: number, ano: number, tipo: "Missões" | "Multas" | "Consolidado") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { relatorios } = await import("../drizzle/schema");
+  const { and } = await import("drizzle-orm");
+  
+  const result = await db.select().from(relatorios)
+    .where(and(
+      eq(relatorios.mes, mes),
+      eq(relatorios.ano, ano),
+      eq(relatorios.tipo, tipo)
+    ))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}

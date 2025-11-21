@@ -349,3 +349,28 @@ export const documentosGerados = mysqlTable("documentosGerados", {
 
 export type DocumentoGerado = typeof documentosGerados.$inferSelect;
 export type InsertDocumentoGerado = typeof documentosGerados.$inferInsert;
+
+/**
+ * Tabela de relatórios gerados
+ * Armazena histórico de relatórios mensais em PDF
+ */
+export const relatorios = mysqlTable("relatorios", {
+  id: int("id").autoincrement().primaryKey(),
+  tipo: mysqlEnum("tipo", ["Missões", "Multas", "Consolidado"]).notNull(),
+  mes: int("mes").notNull(), // 1-12
+  ano: int("ano").notNull(),
+  arquivoUrl: text("arquivoUrl").notNull(), // URL do PDF no S3
+  arquivoNome: varchar("arquivoNome", { length: 255 }).notNull(),
+  // Dados agregados do relatório (JSON)
+  dadosAgregados: text("dadosAgregados"),
+  // Estatísticas resumidas
+  totalMissoes: int("totalMissoes"),
+  totalMultas: int("totalMultas"),
+  receitaMissoes: int("receitaMissoes"), // em centavos
+  valorMultas: int("valorMultas"), // em centavos
+  geradoPor: int("geradoPor").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Relatorio = typeof relatorios.$inferSelect;
+export type InsertRelatorio = typeof relatorios.$inferInsert;

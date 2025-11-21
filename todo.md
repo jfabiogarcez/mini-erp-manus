@@ -391,3 +391,17 @@
 - [ ] Implementar processamento de Excel/PDF para Registros
 - [ ] Criar endpoint genérico de processamento de arquivos
 - [ ] Adicionar validação e feedback de progresso
+
+### 12. Sistema de Relatórios em PDF
+- [x] Instalar biblioteca de geração de PDF (jsPDF ou similar)
+- [x] Criar tabela de relatórios no banco de dados
+- [x] Implementar função de agregação de dados mensais de missões
+- [x] Implementar função de agregação de dados mensais de multas
+- [x] Criar template de relatório de missões em PDF
+- [x] Criar template de relatório de multas em PDF
+- [x] Criar template de relatório consolidado em PDF
+- [x] Implementar interface de geração de relatórios no Dashboard
+- [x] Adicionar seletor de mês/ano para relatórios
+- [x] Implementar download de PDF
+- [ ] Adicionar opção de envio de relatório por e-mail
+- [x] Criar histórico de relatórios gerados

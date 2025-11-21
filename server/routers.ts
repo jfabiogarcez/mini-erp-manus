@@ -769,6 +769,111 @@ Retorne em formato markdown.
         return { success: true };
       }),
   }),
+
+  relatorios: router({
+    list: protectedProcedure.query(async () => {
+      const { getAllRelatorios } = await import("./db");
+      return getAllRelatorios();
+    }),
+    getByTipo: protectedProcedure
+      .input(z.object({ tipo: z.enum(["Missões", "Multas", "Consolidado"]) }))
+      .query(async ({ input }) => {
+        const { getRelatoriosByTipo } = await import("./db");
+        return getRelatoriosByTipo(input.tipo);
+      }),
+    gerar: protectedProcedure
+      .input(
+        z.object({
+          tipo: z.enum(["Missões", "Multas", "Consolidado"]),
+          mes: z.number().min(1).max(12),
+          ano: z.number().min(2020).max(2100),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const {
+          agregarDadosMissoesMensal,
+          agregarDadosMultasMensal,
+          createRelatorio,
+          getRelatorioByPeriodo,
+        } = await import("./db");
+        const {
+          gerarRelatorioMissoesPDF,
+          gerarRelatorioMultasPDF,
+          gerarRelatorioConsolidadoPDF,
+        } = await import("./pdfGenerator");
+        const { storagePut } = await import("./storage");
+
+        // Verificar se já existe relatório para este período
+        const relatorioExistente = await getRelatorioByPeriodo(input.mes, input.ano, input.tipo);
+        if (relatorioExistente) {
+          return {
+            success: true,
+            relatorioId: relatorioExistente.id,
+            arquivoUrl: relatorioExistente.arquivoUrl,
+            mensagem: "Relatório já existe para este período",
+          };
+        }
+
+        // Agregar dados
+        let pdfBuffer: Buffer;
+        let dadosAgregados: any;
+        let totalMissoes = 0;
+        let totalMultas = 0;
+        let receitaMissoes = 0;
+        let valorMultas = 0;
+
+        if (input.tipo === "Missões") {
+          const dados = await agregarDadosMissoesMensal(input.mes, input.ano);
+          pdfBuffer = await gerarRelatorioMissoesPDF(dados);
+          dadosAgregados = dados;
+          totalMissoes = dados.total;
+          receitaMissoes = dados.receitaTotal;
+        } else if (input.tipo === "Multas") {
+          const dados = await agregarDadosMultasMensal(input.mes, input.ano);
+          pdfBuffer = await gerarRelatorioMultasPDF(dados);
+          dadosAgregados = dados;
+          totalMultas = dados.total;
+          valorMultas = dados.valorTotal;
+        } else {
+          // Consolidado
+          const dadosMissoes = await agregarDadosMissoesMensal(input.mes, input.ano);
+          const dadosMultas = await agregarDadosMultasMensal(input.mes, input.ano);
+          pdfBuffer = await gerarRelatorioConsolidadoPDF(dadosMissoes, dadosMultas);
+          dadosAgregados = { missoes: dadosMissoes, multas: dadosMultas };
+          totalMissoes = dadosMissoes.total;
+          totalMultas = dadosMultas.total;
+          receitaMissoes = dadosMissoes.receitaTotal;
+          valorMultas = dadosMultas.valorTotal;
+        }
+
+        // Upload do PDF para S3
+        const nomeArquivo = `relatorio-${input.tipo.toLowerCase()}-${input.mes}-${input.ano}.pdf`;
+        const chaveArquivo = `relatorios/${input.ano}/${input.mes}/${nomeArquivo}`;
+        const { url: arquivoUrl } = await storagePut(chaveArquivo, pdfBuffer, "application/pdf");
+
+        // Salvar no banco de dados
+        const relatorioId = await createRelatorio({
+          tipo: input.tipo,
+          mes: input.mes,
+          ano: input.ano,
+          arquivoUrl,
+          arquivoNome: nomeArquivo,
+          dadosAgregados: JSON.stringify(dadosAgregados),
+          totalMissoes,
+          totalMultas,
+          receitaMissoes,
+          valorMultas,
+          geradoPor: ctx.user?.id,
+        });
+
+        return {
+          success: true,
+          relatorioId,
+          arquivoUrl,
+          mensagem: "Relatório gerado com sucesso",
+        };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
