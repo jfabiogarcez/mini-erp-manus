@@ -1,0 +1,1 @@
+ALTER TABLE `mensagensWhatsapp` ADD `statusEnvio` enum('Pendente','Processando','Enviado','Falhou') DEFAULT 'Pendente' NOT NULL;
