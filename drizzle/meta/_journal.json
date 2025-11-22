@@ -120,6 +120,34 @@
       "when": 1763749856824,
       "tag": "0016_safe_zarek",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1763761903507,
+      "tag": "0017_dizzy_stick",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1763772529336,
+      "tag": "0018_messy_frank_castle",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1763773201010,
+      "tag": "0019_public_james_howlett",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1763774566751,
+      "tag": "0020_eager_wallflower",
+      "breakpoints": true
     }
   ]
 }
