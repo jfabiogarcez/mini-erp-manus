@@ -1,0 +1,60 @@
+{
+  "query": "SELECT * FROM conversasWhatsapp LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2f4rVt6W4F2723W.9201f73b4a2c --database NEcvB6oGEqtoXUY7x8ussz --execute SELECT * FROM conversasWhatsapp LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "numeroCliente": "+5511987654321",
+      "nomeCliente": "Test Client",
+      "ultimaMensagem": "Olá, gostaria de um orçamento",
+      "dataUltimaMsg": "2025-11-21 18:25:17",
+      "statusConversa": "Ativa",
+      "createdAt": "2025-11-21 16:55:22",
+      "updatedAt": "2025-11-21 18:25:17"
+    },
+    {
+      "id": "2",
+      "numeroCliente": "+5511987654322",
+      "nomeCliente": "Test Client 2",
+      "ultimaMensagem": "NULL",
+      "dataUltimaMsg": "NULL",
+      "statusConversa": "Ativa",
+      "createdAt": "2025-11-21 16:55:22",
+      "updatedAt": "2025-11-21 16:55:22"
+    },
+    {
+      "id": "3",
+      "numeroCliente": "+5511987654323",
+      "nomeCliente": "Test Client 3",
+      "ultimaMensagem": "NULL",
+      "dataUltimaMsg": "NULL",
+      "statusConversa": "Ativa",
+      "createdAt": "2025-11-21 16:55:22",
+      "updatedAt": "2025-11-21 16:55:22"
+    },
+    {
+      "id": "4",
+      "numeroCliente": "+5511987654324",
+      "nomeCliente": "Test Client 4",
+      "ultimaMensagem": "NULL",
+      "dataUltimaMsg": "NULL",
+      "statusConversa": "Ativa",
+      "createdAt": "2025-11-21 16:55:22",
+      "updatedAt": "2025-11-21 16:55:22"
+    },
+    {
+      "id": "5",
+      "numeroCliente": "+5511987654325",
+      "nomeCliente": "Test Client 5",
+      "ultimaMensagem": "NULL",
+      "dataUltimaMsg": "NULL",
+      "statusConversa": "Ativa",
+      "createdAt": "2025-11-21 16:55:22",
+      "updatedAt": "2025-11-21 16:55:22"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnumeroCliente\tnomeCliente\tultimaMensagem\tdataUltimaMsg\tstatusConversa\tcreatedAt\tupdatedAt\n1\t+5511987654321\tTest Client\tOlá, gostaria de um orçamento\t2025-11-21 18:25:17\tAtiva\t2025-11-21 16:55:22\t2025-11-21 18:25:17\n2\t+5511987654322\tTest Client 2\tNULL\tNULL\tAtiva\t2025-11-21 16:55:22\t2025-11-21 16:55:22\n3\t+5511987654323\tTest Client 3\tNULL\tNULL\tAtiva\t2025-11-21 16:55:22\t2025-11-21 16:55:22\n4\t+5511987654324\tTest Client 4\tNULL\tNULL\tAtiva\t2025-11-21 16:55:22\t2025-11-21 16:55:22\n5\t+5511987654325\tTest Client 5\tNULL\tNULL\tAtiva\t2025-11-21 16:55:22\t2025-11-21 16:55:22\n",
+  "stderr": "",
+  "execution_time_ms": 114
+}

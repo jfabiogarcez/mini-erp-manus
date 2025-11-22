@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE mensagensWhatsapp ADD COLUMN statusEnvio ENUM('Pendente', 'Processando', 'Enviado', 'Falhou') DEFAULT 'Pendente' NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2f4rVt6W4F2723W.9201f73b4a2c --database NEcvB6oGEqtoXUY7x8ussz --execute ALTER TABLE mensagensWhatsapp ADD COLUMN statusEnvio ENUM('Pendente', 'Processando', 'Enviado', 'Falhou') DEFAULT 'Pendente' NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 454
+}
