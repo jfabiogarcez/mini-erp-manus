@@ -1,1 +1,0 @@
-ALTER TABLE `modelos` MODIFY COLUMN `tipoArquivo` varchar(100);
