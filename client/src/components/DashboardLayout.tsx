@@ -21,15 +21,27 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Briefcase, ClipboardList, Bell, Mail, AlertCircle, DollarSign, BookOpen, MessageSquare, BarChart3 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: LayoutDashboard, label: "Visao Geral", path: "/" },
+  { icon: ClipboardList, label: "Registros", path: "/registros" },
+  { icon: Bell, label: "Tarefas", path: "/tarefas" },
+  { icon: Mail, label: "E-mail", path: "/email" },
+  { icon: AlertCircle, label: "Multas", path: "/multas" },
+  { icon: DollarSign, label: "Cobranca por Link", path: "/cobranca" },
+  { icon: BookOpen, label: "Aprendizados da IA", path: "/aprendizados" },
+  { icon: Briefcase, label: "Modelos de Documentos", path: "/modelos" },
+  { icon: Briefcase, label: "Missoes", path: "/missoes" },
+  { icon: BarChart3, label: "Relatorios", path: "/relatorios" },
+  { icon: BarChart3, label: "Metricas e KPIs", path: "/metricas" },
+  { icon: MessageSquare, label: "WhatsApp Chat", path: "/whatsapp-chat" },
+  { icon: MessageSquare, label: "WhatsApp Gerenciador", path: "/whatsapp" },
+  { icon: Users, label: "Equipe", path: "/equipe" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
