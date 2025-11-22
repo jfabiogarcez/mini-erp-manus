@@ -20,10 +20,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <main>
+      <main className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-6">Example Page</h1>
         {/* Example: lucide-react for icons */}
         <Loader2 className="animate-spin" />
-        Example Page
         {/* Example: Streamdown for markdown rendering */}
         <Streamdown>Any **markdown** content</Streamdown>
         <Button variant="default">Example Button</Button>

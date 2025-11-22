@@ -1,0 +1,20 @@
+CREATE TABLE `multas` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`numero_auto` varchar(100),
+	`data_infracao` timestamp,
+	`hora_infracao` varchar(10),
+	`local_infracao` text,
+	`codigo_infracao` varchar(50),
+	`descricao_infracao` text,
+	`valor` int DEFAULT 0,
+	`pontos` int DEFAULT 0,
+	`veiculo_placa` varchar(20),
+	`motorista_id` int,
+	`data_vencimento` timestamp,
+	`status` enum('Pendente','Pago','Recorrido','Cancelado') NOT NULL DEFAULT 'Pendente',
+	`pdf_url` text,
+	`observacoes` text,
+	`created_at` timestamp NOT NULL DEFAULT (now()),
+	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `multas_id` PRIMARY KEY(`id`)
+);
