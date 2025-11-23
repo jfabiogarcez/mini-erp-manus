@@ -20,6 +20,7 @@ import WhatsappChat from "./pages/WhatsappChat";
 import Registros from "./pages/Registros";
 import Tarefas from "./pages/Tarefas";
 import Email from "./pages/Email";
+import Caixa from "./pages/Caixa";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -41,6 +42,7 @@ function Router() {
       <Route path={"/registros"} component={Registros} />
       <Route path={"/tarefas"} component={Tarefas} />
       <Route path={"/email"} component={Email} />
+      <Route path={"/caixa"} component={Caixa} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -140,6 +140,7 @@ export default function Missoes() {
       veiculo: formData.get("veiculo") as string,
       veiculoPlaca: formData.get("veiculoPlaca") as string,
       valor: Number(formData.get("valor")) * 100, // Converter para centavos
+      cr: formData.get("cr") as string,
       status: formData.get("status") as any,
       horaInicio: formData.get("horaInicio") as string,
       horaFim: formData.get("horaFim") as string,
@@ -396,6 +397,16 @@ export default function Missoes() {
                         }
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="cr">CR (Centro de Resultado)</Label>
+                    <Input
+                      id="cr"
+                      name="cr"
+                      placeholder="Ex: CR-001, CR-SP-2025..."
+                      defaultValue={editingMissao?.cr || ""}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

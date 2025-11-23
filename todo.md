@@ -690,3 +690,10 @@
 - [x] WebSocket para atualizacao em tempo real
 - [x] Link no Dashboard para acesso rápido
 - [x] Layout responsivo tipo WhatsApp real
+
+## Melhorias Urgentes - Nova Solicitação
+
+- [x] Remover aba duplicada do WhatsApp (manter apenas WhatsApp Chat)
+- [x] Adicionar botões de Upload/Download em TODAS as abas do sistema
+- [x] Atualizar aba Missões com botão upload Excel e campo CR
+- [x] Criar nova aba Caixa com dados financeiros
