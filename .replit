@@ -1,0 +1,15 @@
+modules = ["nodejs-20"]
+
+[nix]
+channel = "stable-23_11"
+
+[unitTest]
+language = "nodejs"
+
+[deployment]
+run = ["pnpm", "start"]
+build = ["pnpm", "install", "&&", "pnpm", "run", "build"]
+
+[[ports]]
+localPort = 3000
+externalPort = 80
