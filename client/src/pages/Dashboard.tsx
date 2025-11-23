@@ -274,6 +274,10 @@ export default function Dashboard() {
             <MessageCircle className="h-5 w-5" />
             WhatsApp
           </Link>
+          <Link href="/gerenciador-abas" className="flex items-center gap-3 px-3 py-2 rounded-lg text-purple-700 hover:bg-purple-50 font-medium">
+            <Layers className="h-5 w-5" />
+            Gerenciador de Abas
+          </Link>
           <div className="space-y-1">
             <Link href="/equipe" className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
               <div className="flex items-center gap-3">
