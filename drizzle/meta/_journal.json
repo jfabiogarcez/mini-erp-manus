@@ -148,13 +148,6 @@
       "when": 1763774566751,
       "tag": "0020_eager_wallflower",
       "breakpoints": true
-    },
-    {
-      "idx": 21,
-      "version": "5",
-      "when": 1763904726371,
-      "tag": "0021_opposite_callisto",
-      "breakpoints": true
     }
   ]
 }

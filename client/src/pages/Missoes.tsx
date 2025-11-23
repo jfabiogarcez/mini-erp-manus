@@ -28,9 +28,6 @@ import {
 } from "@/components/ui/select";
 import { Calendar, Plus, Pencil, Trash2, Search, Upload, FileSpreadsheet, FileText } from "lucide-react";
 import { toast } from "sonner";
-import CustomizadorVisual from "@/components/CustomizadorVisual";
-import ConfiguracaoExportacao from "@/components/ConfiguracaoExportacao";
-import BotaoIA from "@/components/BotaoIA";
 
 export default function Missoes() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -241,10 +238,6 @@ export default function Missoes() {
             </div>
 
             <div className="flex gap-2">
-              <ConfiguracaoExportacao rotaPagina="/missoes" />
-              
-              <BotaoIA rotaPagina="/missoes" dadosContexto={missoes} />
-              
               <Label htmlFor="file-upload" className="cursor-pointer">
                 <Button
                   type="button"
@@ -565,9 +558,6 @@ export default function Missoes() {
           )}
         </div>
       </div>
-      
-      {/* Botão flutuante de customização */}
-      <CustomizadorVisual rotaPagina="/missoes" />
     </div>
   );
 }
