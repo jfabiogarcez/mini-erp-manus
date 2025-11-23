@@ -1140,3 +1140,31 @@ export async function deleteDocumento(id: number): Promise<void> {
   
   await db.delete(documentosWhatsapp).where(eq(documentosWhatsapp.id, id));
 }
+
+
+// ==================== ABAS DINÂMICAS ====================
+// Imports removidos temporariamente - tabelas serão criadas em migração futura
+
+export async function listarAbasPersonalizadas(userId: number) {
+  // TODO: Implementar quando tabelas forem criadas
+  return [];
+}
+
+export async function criarAbaPersonalizada(data: any) {
+  // TODO: Implementar quando tabelas forem criadas
+  return { id: 1 };
+}
+
+export async function excluirAbaPersonalizada(id: number) {
+  // TODO: Implementar quando tabelas forem criadas
+}
+
+export async function listarCamposAba(abaId: number) {
+  // TODO: Implementar quando tabelas forem criadas
+  return [];
+}
+
+export async function criarCampoPersonalizado(data: any) {
+  // TODO: Implementar quando tabelas forem criadas
+  return { id: 1 };
+}

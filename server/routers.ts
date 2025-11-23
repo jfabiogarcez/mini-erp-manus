@@ -1140,6 +1140,104 @@ Retorne em formato markdown.
         }),
     }),
   }),
+
+  // Abas Dinâmicas
+  abasDinamicas: router({
+    listar: protectedProcedure.query(async ({ ctx }) => {
+      const { listarAbasPersonalizadas } = await import("./db");
+      return listarAbasPersonalizadas(ctx.user.id);
+    }),
+    criar: protectedProcedure
+      .input(z.object({
+        nome: z.string(),
+        icone: z.string().optional(),
+        cor: z.string().optional(),
+        descricao: z.string().optional(),
+        abaPaiId: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { criarAbaPersonalizada } = await import("./db");
+        return criarAbaPersonalizada({ ...input, userId: ctx.user.id });
+      }),
+    excluir: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { excluirAbaPersonalizada } = await import("./db");
+        await excluirAbaPersonalizada(input.id);
+        return { success: true };
+      }),
+    listarCampos: protectedProcedure
+      .input(z.object({ abaId: z.number() }))
+      .query(async ({ input }) => {
+        const { listarCamposAba } = await import("./db");
+        return listarCamposAba(input.abaId);
+      }),
+    criarCampo: protectedProcedure
+      .input(z.object({
+        abaId: z.number(),
+        nome: z.string(),
+        tipo: z.string(),
+        obrigatorio: z.boolean().default(false),
+        opcoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { criarCampoPersonalizado } = await import("./db");
+        return criarCampoPersonalizado(input);
+      }),
+  }),
+
+  // Exportação
+  exportacao: router({
+    excel: protectedProcedure
+      .input(z.object({
+        dados: z.array(z.any()),
+        colunas: z.array(z.string()),
+        nomeArquivo: z.string().default("exportacao"),
+      }))
+      .mutation(async ({ input }) => {
+        const { exportarParaExcel } = await import("./exportacao");
+        const buffer = await exportarParaExcel(input.dados, input.colunas);
+        const base64 = buffer.toString("base64");
+        return { base64, nomeArquivo: `${input.nomeArquivo}.xlsx` };
+      }),
+    pdf: protectedProcedure
+      .input(z.object({
+        dados: z.array(z.any()),
+        titulo: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { exportarParaPDF } = await import("./exportacao");
+        const html = await exportarParaPDF(input.dados, input.titulo);
+        return { html };
+      }),
+  }),
+
+  // Automação com IA
+  iaAutomacao: router({
+    executarInstrucao: protectedProcedure
+      .input(z.object({
+        instrucao: z.string(),
+        parametros: z.record(z.any()).optional(),
+        contexto: z.any().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        
+        const prompt = `Você é um assistente de automação empresarial. Execute a seguinte instrução:\n\nInstrução: ${input.instrucao}\n\nParâmetros: ${JSON.stringify(input.parametros || {})}\n\nContexto dos dados: ${JSON.stringify(input.contexto || {}).substring(0, 1000)}`;
+        
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: "Você é um assistente de automação empresarial especializado em gerar orçamentos, relatórios e análises." },
+            { role: "user", content: prompt },
+          ],
+        });
+        
+        return {
+          resultado: response.choices[0]?.message?.content || "Erro ao processar instrução",
+          sucesso: true,
+        };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
