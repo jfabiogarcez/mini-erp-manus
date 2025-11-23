@@ -473,3 +473,127 @@ export const documentosWhatsapp = mysqlTable("documentosWhatsapp", {
 
 export type DocumentoWhatsapp = typeof documentosWhatsapp.$inferSelect;
 export type InsertDocumentoWhatsapp = typeof documentosWhatsapp.$inferInsert;
+
+/**
+ * Tabela de abas personalizadas criadas pelo usuário
+ */
+export const abasPersonalizadas = mysqlTable("abasPersonalizadas", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  icone: varchar("icone", { length: 50 }), // Nome do ícone Lucide
+  rota: varchar("rota", { length: 255 }).notNull().unique(), // Ex: /minha-aba
+  ordem: int("ordem").default(0).notNull(), // Ordem de exibição no menu
+  abaPaiId: int("abaPaiId"), // FK para criar sub-abas
+  ativo: int("ativo").default(1).notNull(), // Boolean
+  userId: int("userId").notNull(), // Usuário que criou
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AbaPersonalizada = typeof abasPersonalizadas.$inferSelect;
+export type InsertAbaPersonalizada = typeof abasPersonalizadas.$inferInsert;
+
+/**
+ * Tabela de campos personalizados para cada aba
+ */
+export const camposPersonalizados = mysqlTable("camposPersonalizados", {
+  id: int("id").autoincrement().primaryKey(),
+  abaId: int("abaId").notNull(), // FK para abasPersonalizadas
+  nome: varchar("nome", { length: 255 }).notNull(),
+  tipo: mysqlEnum("tipo", ["texto", "numero", "data", "email", "telefone", "select", "checkbox", "textarea", "arquivo", "moeda"]).notNull(),
+  opcoes: text("opcoes"), // JSON array para tipo "select"
+  obrigatorio: int("obrigatorio").default(0).notNull(), // Boolean
+  ordem: int("ordem").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CampoPersonalizado = typeof camposPersonalizados.$inferSelect;
+export type InsertCampoPersonalizado = typeof camposPersonalizados.$inferInsert;
+
+/**
+ * Tabela de dados das abas personalizadas
+ */
+export const dadosAbasPersonalizadas = mysqlTable("dadosAbasPersonalizadas", {
+  id: int("id").autoincrement().primaryKey(),
+  abaId: int("abaId").notNull(), // FK para abasPersonalizadas
+  dados: text("dados").notNull(), // JSON com todos os valores dos campos
+  userId: int("userId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DadoAbaPersonalizada = typeof dadosAbasPersonalizadas.$inferSelect;
+export type InsertDadoAbaPersonalizada = typeof dadosAbasPersonalizadas.$inferInsert;
+
+/**
+ * Tabela de relacionamentos entre abas (conciliação)
+ */
+export const relacionamentosAbas = mysqlTable("relacionamentosAbas", {
+  id: int("id").autoincrement().primaryKey(),
+  abaOrigemId: int("abaOrigemId").notNull(), // FK para abasPersonalizadas
+  abaDestinoId: int("abaDestinoId").notNull(), // FK para abasPersonalizadas
+  campoOrigemId: int("campoOrigemId").notNull(), // FK para camposPersonalizados
+  campoDestinoId: int("campoDestinoId").notNull(), // FK para camposPersonalizados
+  tipoRelacionamento: mysqlEnum("tipoRelacionamento", ["um-para-um", "um-para-muitos", "muitos-para-muitos"]).notNull(),
+  ativo: int("ativo").default(1).notNull(), // Boolean
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RelacionamentoAba = typeof relacionamentosAbas.$inferSelect;
+export type InsertRelacionamentoAba = typeof relacionamentosAbas.$inferInsert;
+
+/**
+ * Tabela de customizações visuais por aba
+ */
+export const customizacoesVisuais = mysqlTable("customizacoesVisuais", {
+  id: int("id").autoincrement().primaryKey(),
+  abaId: int("abaId").notNull(), // FK para abasPersonalizadas (ou NULL para abas fixas)
+  rotaPagina: varchar("rotaPagina", { length: 255 }), // Ex: /missoes, /caixa
+  corPrimaria: varchar("corPrimaria", { length: 7 }).default("#3b82f6"), // Hex color
+  corSecundaria: varchar("corSecundaria", { length: 7 }).default("#10b981"), // Hex color
+  corFundo: varchar("corFundo", { length: 7 }).default("#f9fafb"), // Hex color
+  fonteFamilia: varchar("fonteFamilia", { length: 100 }).default("Inter"), // Nome da fonte
+  fonteTamanho: int("fonteTamanho").default(16), // Tamanho base em px
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CustomizacaoVisual = typeof customizacoesVisuais.$inferSelect;
+export type InsertCustomizacaoVisual = typeof customizacoesVisuais.$inferInsert;
+
+/**
+ * Tabela de configurações de exportação por aba
+ */
+export const configuracoesExportacao = mysqlTable("configuracoesExportacao", {
+  id: int("id").autoincrement().primaryKey(),
+  abaId: int("abaId").notNull(), // FK para abasPersonalizadas
+  pastaDestino: text("pastaDestino"), // Caminho da pasta ou URL
+  modeloDocumentoId: int("modeloDocumentoId"), // FK para modelos (tabela existente)
+  canalExportacao: mysqlEnum("canalExportacao", ["whatsapp", "email", "ambos"]).default("email").notNull(),
+  destinatarioPadrao: text("destinatarioPadrao"), // Email ou telefone padrão
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ConfiguracaoExportacao = typeof configuracoesExportacao.$inferSelect;
+export type InsertConfiguracaoExportacao = typeof configuracoesExportacao.$inferInsert;
+
+/**
+ * Tabela de instruções de IA por aba
+ */
+export const instrucoesIA = mysqlTable("instrucoesIA", {
+  id: int("id").autoincrement().primaryKey(),
+  abaId: int("abaId").notNull(), // FK para abasPersonalizadas
+  nomeInstrucao: varchar("nomeInstrucao", { length: 255 }).notNull(),
+  instrucao: text("instrucao").notNull(), // Texto da instrução para a IA
+  parametros: text("parametros"), // JSON com parâmetros dinâmicos
+  ativo: int("ativo").default(1).notNull(), // Boolean
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type InstrucaoIA = typeof instrucoesIA.$inferSelect;
+export type InsertInstrucaoIA = typeof instrucoesIA.$inferInsert;

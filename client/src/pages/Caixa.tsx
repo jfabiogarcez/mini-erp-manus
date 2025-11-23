@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/table";
 import { DollarSign, Plus, Pencil, Trash2, Search, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
+import CustomizadorVisual from "@/components/CustomizadorVisual";
+import ConfiguracaoExportacao from "@/components/ConfiguracaoExportacao";
+import BotaoIA from "@/components/BotaoIA";
 
 export default function Caixa() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -132,6 +135,10 @@ export default function Caixa() {
             </div>
 
             <div className="flex gap-2">
+              <ConfiguracaoExportacao rotaPagina="/caixa" />
+              
+              <BotaoIA rotaPagina="/caixa" dadosContexto={lancamentos} />
+              
               <Label htmlFor="file-upload-caixa" className="cursor-pointer">
                 <Button
                   type="button"
@@ -383,6 +390,9 @@ export default function Caixa() {
           </div>
         )}
       </div>
+      
+      {/* Botão flutuante de customização */}
+      <CustomizadorVisual rotaPagina="/caixa" />
     </div>
   );
 }

@@ -697,3 +697,58 @@
 - [x] Adicionar botões de Upload/Download em TODAS as abas do sistema
 - [x] Atualizar aba Missões com botão upload Excel e campo CR
 - [x] Criar nova aba Caixa com dados financeiros
+
+## Sistema de Gerenciamento Dinâmico de Abas - Nova Funcionalidade
+
+### 1. Sistema de Abas Dinâmicas
+- [ ] Criar banco de dados de abas personalizadas
+- [ ] Implementar botão para criar nova aba
+- [ ] Implementar botão para excluir aba
+- [ ] Criar seletor de campos customizáveis para cada aba
+- [ ] Implementar sistema de conciliação entre tabelas
+- [ ] Criar sistema de sub-abas expansíveis
+- [ ] Implementar relacionamento entre abas
+
+### 2. Customização Visual
+- [ ] Criar editor de cores por página
+- [ ] Criar editor de fontes por página
+- [ ] Criar editor de tamanhos por página
+- [ ] Implementar persistência de preferências visuais
+- [ ] Criar botão de customização em cada página
+
+### 3. Gestão de Arquivos
+- [ ] Criar campo para indicar pasta de salvamento
+- [ ] Criar campo para linkar arquivos
+- [ ] Implementar seleção de modelo de documento
+- [ ] Criar campo para escolha de canal (WhatsApp/Email)
+
+### 4. Automação com IA
+- [ ] Criar botão de IA em cada aba
+- [ ] Implementar campo de instruções automáticas
+- [ ] Criar sistema de execução de comandos IA
+- [ ] Integrar com WhatsApp e Email para envio automático
+
+## Status da Implementação (Atualizado)
+
+### Concluído ✅
+- [x] Criar banco de dados de abas personalizadas
+- [x] Criar banco de dados de campos personalizados
+- [x] Criar banco de dados de relacionamentos entre abas
+- [x] Criar banco de dados de customizações visuais
+- [x] Criar banco de dados de configurações de exportação
+- [x] Criar banco de dados de instruções de IA
+- [x] Criar página de gerenciamento de abas dinâmicas
+- [x] Criar componente de customização visual (cores, fontes, tamanhos)
+- [x] Criar componente de configuração de exportação
+- [x] Criar componente de botão IA com instruções
+- [x] Integrar componentes na página Missões
+- [x] Integrar componentes na página Caixa
+- [x] Adicionar rota do Gerenciador de Abas
+- [x] Adicionar link no menu do Dashboard
+
+### Pendente (Funcionalidades Avançadas)
+- [ ] Implementar backend (tRPC procedures) para abas dinâmicas
+- [ ] Implementar lógica real de exportação de arquivos
+- [ ] Integrar IA real para execução de instruções
+- [ ] Implementar renderização dinâmica de abas criadas
+- [ ] Implementar sistema de conciliação entre tabelas
