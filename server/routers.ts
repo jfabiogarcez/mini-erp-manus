@@ -1197,7 +1197,7 @@ Retorne em formato markdown.
       .mutation(async ({ input }) => {
         const { exportarParaExcel } = await import("./exportacao");
         const buffer = await exportarParaExcel(input.dados, input.colunas);
-        const base64 = buffer.toString("base64");
+        const base64 = (buffer as unknown as Buffer).toString("base64");
         return { base64, nomeArquivo: `${input.nomeArquivo}.xlsx` };
       }),
     pdf: protectedProcedure
@@ -1217,7 +1217,7 @@ Retorne em formato markdown.
     executarInstrucao: protectedProcedure
       .input(z.object({
         instrucao: z.string(),
-        parametros: z.record(z.any()).optional(),
+        parametros: z.record(z.string(), z.any()).optional(),
         contexto: z.any().optional(),
       }))
       .mutation(async ({ input }) => {

@@ -155,7 +155,7 @@ export default function GerenciadorAbas() {
                     </p>
                     {aba.campos.length > 0 && (
                       <div className="space-y-1">
-                        {aba.campos.map((campo) => (
+                        {aba.campos.map((campo: any) => (
                           <div key={campo.id} className="text-sm bg-gray-50 p-2 rounded">
                             <span className="font-medium">{campo.nome}</span>
                             <span className="text-gray-600 ml-2">({campo.tipo})</span>
