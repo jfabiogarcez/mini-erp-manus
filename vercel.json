@@ -5,7 +5,7 @@
 
   "functions": {
     "server/_core/index.ts": {
-      "runtime": "nodejs22.x",
+      "runtime": "nodejs22.x@latest",
       "memory": 1024,
       "maxDuration": 60
     }
