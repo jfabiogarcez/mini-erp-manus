@@ -2,7 +2,7 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist/public",
   "framework": "vite",
-  "serverFunctions": ["server/**/*.ts"],
+
   "functions": {
     "server/_core/index.ts": {
       "runtime": "nodejs22.x",
