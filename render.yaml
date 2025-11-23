@@ -3,7 +3,6 @@ services:
     name: mini-erp-manus
     env: docker
     dockerfilePath: ./Dockerfile
-    startCommand: pnpm start
     envVars:
       - key: NODE_ENV
         value: production
