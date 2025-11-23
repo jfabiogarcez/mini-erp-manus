@@ -1140,3 +1140,39 @@ export async function deleteDocumento(id: number): Promise<void> {
   
   await db.delete(documentosWhatsapp).where(eq(documentosWhatsapp.id, id));
 }
+
+
+// ==================== ABAS DINÂMICAS ====================
+import { abasPersonalizadas, camposPersonalizados, dadosAbasPersonalizadas, relacionamentosAbas } from "../drizzle/schema";
+
+export async function listarAbasPersonalizadas(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(abasPersonalizadas).where(eq(abasPersonalizadas.userId, userId));
+}
+
+export async function criarAbaPersonalizada(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(abasPersonalizadas).values(data);
+  return result;
+}
+
+export async function excluirAbaPersonalizada(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(abasPersonalizadas).where(eq(abasPersonalizadas.id, id));
+}
+
+export async function listarCamposAba(abaId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(camposPersonalizados).where(eq(camposPersonalizados.abaId, abaId));
+}
+
+export async function criarCampoPersonalizado(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(camposPersonalizados).values(data);
+  return result;
+}
